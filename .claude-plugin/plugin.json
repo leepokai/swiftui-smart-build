@@ -1,0 +1,11 @@
+{
+  "name": "swiftui-smart-build",
+  "version": "1.0.0",
+  "description": "Automatically build, install, and launch Swift/SwiftUI apps after code changes. Deploys to running simulator or connected device.",
+  "author": {
+    "name": "leepokai"
+  },
+  "repository": "https://github.com/leepokai/swiftui-smart-build",
+  "license": "MIT",
+  "keywords": ["swift", "swiftui", "xcode", "ios", "build", "simulator", "deploy", "lsp"]
+}

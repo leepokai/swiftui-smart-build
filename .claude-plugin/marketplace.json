@@ -1,0 +1,25 @@
+{
+  "name": "swiftui-smart-build",
+  "version": "1.0.0",
+  "owner": {
+    "name": "leepokai"
+  },
+  "metadata": {
+    "description": "Auto build and deploy Swift/SwiftUI apps to simulator or device after Claude Code conversations"
+  },
+  "plugins": [
+    {
+      "name": "swiftui-smart-build",
+      "source": "./",
+      "description": "Automatically build, install, and launch Swift/SwiftUI apps after code changes. Deploys to running simulator or connected device.",
+      "version": "1.0.0",
+      "author": {
+        "name": "leepokai"
+      },
+      "category": "development",
+      "keywords": ["swift", "swiftui", "xcode", "ios", "build", "simulator", "deploy"],
+      "license": "MIT",
+      "repository": "https://github.com/leepokai/swiftui-smart-build"
+    }
+  ]
+}
