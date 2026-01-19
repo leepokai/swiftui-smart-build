@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.1] - 2025-01-19
+
+### Fixed
+- Removed unnecessary `matcher` field from Stop and SessionStart hooks
+- Simplified command files to reference skills by name instead of file paths
+
+### Added
+- Added `settings` command
+
 ## [1.2.0] - 2025-01-19
 
 ### Added
@@ -54,7 +63,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - iOS Simulator deployment
 - Physical device deployment (iOS 17+ via `devicectl`)
 
-[Unreleased]: https://github.com/leepokai/swiftui-smart-build/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/leepokai/swiftui-smart-build/compare/v1.2.1...HEAD
+[1.2.1]: https://github.com/leepokai/swiftui-smart-build/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/leepokai/swiftui-smart-build/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/leepokai/swiftui-smart-build/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/leepokai/swiftui-smart-build/releases/tag/v1.0.0

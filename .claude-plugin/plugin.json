@@ -1,6 +1,6 @@
 {
   "name": "swiftui-smart-build",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Automatically build, install, and launch Swift/SwiftUI apps after code changes. Deploys to running simulator or connected device.",
   "author": {
     "name": "leepokai"
