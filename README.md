@@ -51,10 +51,12 @@ You'll be asked to choose:
 
 ### Build Your App
 
-After setup, just ask Claude to build:
+After setup, use these commands:
 
 ```
-/swiftui-smart-build@leepokai:smart-build
+/swiftui-smart-build@leepokai:run      # Build + install + launch
+/swiftui-smart-build@leepokai:build    # Build only
+/swiftui-smart-build@leepokai:install  # Install last built app
 ```
 
 Or simply tell Claude: "Build and run this app"
@@ -138,13 +140,24 @@ Or for custom mode:
 }
 ```
 
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `/swiftui-smart-build@leepokai:setup` | First-time configuration wizard |
+| `/swiftui-smart-build@leepokai:build` | Build only (no install) |
+| `/swiftui-smart-build@leepokai:install` | Install and launch the last built app |
+| `/swiftui-smart-build@leepokai:run` | Build + install + launch (complete workflow) |
+
 ## Skills
+
+Skills are detailed instruction files that guide Claude through complex workflows. Commands load these skills automatically.
 
 | Skill | Description |
 |-------|-------------|
-| `setup` | First-time configuration |
+| `setup` | First-time configuration flow |
 | `settings` | View/modify current settings |
-| `smart-build` | Build with saved settings |
+| `smart-build` | Build with auto-install on conversation end |
 
 ## Requirements
 

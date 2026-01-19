@@ -1,73 +1,39 @@
 ---
-description: Build the Swift/SwiftUI project and prepare for auto-install on Stop
+description: Build the Swift/SwiftUI project (build only, no install)
 ---
 
 # Build Command
 
-Build the current Swift/SwiftUI project. On success, mark it ready for auto-install when the conversation ends.
+Build the current Swift/SwiftUI project without installing.
 
 ## Instructions
 
-1. **Detect the project**:
-   - Look for `.xcworkspace` (priority) or `.xcodeproj` in the current directory
-   - For Swift packages, look for `Package.swift`
+1. **Check for config**: Read `.smart-build.json` to get mode settings
+   - If no config exists, tell user to run `/swiftui-smart-build@leepokai:setup` first
 
-2. **Detect the scheme**:
+2. **Get build settings**:
+   - If Xcode mode: Run `${CLAUDE_PLUGIN_ROOT}/scripts/get-xcode-settings.sh`
+   - If Custom mode: Use values from `.smart-build.json`
+
+3. **Find project**:
    ```bash
-   xcodebuild -project <path> -list -json
-   # or
-   xcodebuild -workspace <path> -list -json
+   XCWORKSPACE=$(find . -maxdepth 2 -name "*.xcworkspace" ! -path "*/.*" | head -1)
+   XCODEPROJ=$(find . -maxdepth 2 -name "*.xcodeproj" ! -path "*/.*" | head -1)
    ```
-
-3. **Detect the destination** (priority order):
-   - Running simulator: `xcrun simctl list devices booted -j`
-   - Connected device: `xcrun devicectl list devices -j`
-   - Any available simulator: `xcrun simctl list devices available -j`
 
 4. **Run the build**:
    ```bash
-   xcodebuild -project <path> \
-     -scheme <scheme> \
-     -destination "platform=iOS Simulator,id=<udid>" \
+   # Use workspace if exists, otherwise project
+   xcodebuild -workspace "$XCWORKSPACE" \
+     -scheme "$SCHEME" \
+     -destination "platform=iOS Simulator,id=$UDID" \
      -configuration Debug \
      -allowProvisioningUpdates \
      build
    ```
 
-5. **If build succeeds**:
-   - Find the `.app` path from build output or DerivedData
-   - Get bundle ID: `defaults read <app_path>/Info.plist CFBundleIdentifier`
-   - Mark ready for install:
-     ```bash
-     ${CLAUDE_PLUGIN_ROOT}/scripts/mark-ready-to-install.sh \
-       "<app_path>" "<bundle_id>" "<device_type>" "<device_udid>" "<device_name>"
-     ```
+5. **Report result**:
+   - If build succeeds: Tell user "Build succeeded"
+   - If build fails: Show errors and offer to fix
 
-6. **If build fails**:
-   - Show the errors
-   - Fix the code
-   - Try again until successful
-
-## Example
-
-```bash
-# 1. Build
-xcodebuild -project MyApp.xcodeproj -scheme MyApp \
-  -destination "platform=iOS Simulator,id=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" \
-  -configuration Debug build
-
-# 2. On success, mark ready
-/path/to/mark-ready-to-install.sh \
-  "/Users/.../Debug-iphonesimulator/MyApp.app" \
-  "com.example.MyApp" \
-  "simulator" \
-  "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" \
-  "iPhone 16 Pro"
-```
-
-## After Conversation Ends
-
-The Stop hook will automatically:
-1. Check if a marker file exists
-2. If yes: Install and launch the app on the destination
-3. If no: Do nothing
+This command only builds. Use `/swiftui-smart-build@leepokai:install` to install, or `/swiftui-smart-build@leepokai:run` to build and install together.
