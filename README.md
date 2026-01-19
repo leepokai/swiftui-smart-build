@@ -5,9 +5,10 @@ A Claude Code plugin that automatically builds, installs, and launches Swift/Swi
 ## Features
 
 - **Auto Build & Deploy**: When Claude finishes coding and confirms a successful build, the app automatically installs and launches on your device
-- **Smart Detection**: Automatically detects running simulator, connected device, scheme, and project type
+- **Xcode Sync Mode**: Automatically use whatever scheme and destination is selected in Xcode
+- **Custom Mode**: Specify fixed scheme and destination
 - **LSP Support**: Includes SourceKit-LSP configuration for Swift code intelligence
-- **Zero Configuration**: Works out of the box with any Xcode project or Swift package
+- **Zero Config After Setup**: One-time setup, then fully automatic
 
 ## Installation
 
@@ -20,34 +21,70 @@ A Claude Code plugin that automatically builds, installs, and launches Swift/Swi
 ### 2. Install the Plugin
 
 ```
-/plugin install swiftui-smart-build
+/plugin install swiftui-smart-build@leepokai
 ```
+
+## ⚠️ Important: Run From Project Directory
+
+**Always start Claude from your Xcode project folder:**
+
+```bash
+cd /path/to/YourApp      # Your project with .xcodeproj
+claude                    # Start Claude here
+```
+
+❌ **Do NOT run from home directory or other locations** - the plugin needs to find your `.xcodeproj` to work properly.
 
 ## Usage
 
-### Load the Skill
+### First-Time Setup
 
-To enable smart build capabilities, load the skill:
-
-```
-/swiftui-smart-build:smart-build
-```
-
-This teaches Claude how to:
-1. Build your Swift/SwiftUI project
-2. Detect the correct scheme and destination
-3. Mark the app ready for auto-install when the conversation ends
-
-### Workflow
+Run the setup skill to configure how Smart Build determines build settings:
 
 ```
+/swiftui-smart-build@leepokai:setup
+```
+
+You'll be asked to choose:
+- **Xcode Sync** (Recommended) - Automatically use Xcode's current scheme and destination
+- **Custom** - Specify a fixed scheme and destination
+
+### Build Your App
+
+After setup, just ask Claude to build:
+
+```
+/swiftui-smart-build@leepokai:smart-build
+```
+
+Or simply tell Claude: "Build and run this app"
+
+### Change Settings
+
+To view or modify settings anytime:
+
+```
+/swiftui-smart-build@leepokai:settings
+```
+
+## Workflow
+
+```
+┌─────────────────────────────────────────────────┐
+│  First Time: /swiftui-smart-build@leepokai:setup │
+│                                                 │
+│  Choose: [Xcode Sync] or [Custom]               │
+│  → Settings saved to .smart-build.json          │
+└─────────────────────────────────────────────────┘
+                      ↓
 ┌─────────────────────────────────────────────────┐
 │  During Conversation                            │
 │                                                 │
 │  1. Ask Claude to modify Swift code             │
-│  2. Ask Claude to build the project             │
-│  3. Claude builds until successful              │
-│  4. Claude marks app ready for install          │
+│  2. Ask Claude to build                         │
+│  3. Claude reads your settings automatically    │
+│  4. Claude builds until successful              │
+│  5. Claude marks app ready for install          │
 └─────────────────────────────────────────────────┘
                       ↓
 ┌─────────────────────────────────────────────────┐
@@ -60,53 +97,60 @@ This teaches Claude how to:
 └─────────────────────────────────────────────────┘
 ```
 
-### Example
+## Configuration Modes
 
+### Xcode Sync Mode
+
+Smart Build reads your current Xcode selection from `UserInterfaceState.xcuserstate`. Whatever you have selected in Xcode is what gets built.
+
+**Pros**: Always matches Xcode, no manual config needed
+**Cons**: Must have project open in Xcode
+
+### Custom Mode
+
+You specify a fixed scheme and destination during setup. Smart Build always uses these settings.
+
+**Pros**: Works without Xcode open, consistent builds
+**Cons**: Need to update settings manually if you want to change
+
+## Config File
+
+Settings are stored in `.smart-build.json` in your project root:
+
+```json
+{
+  "mode": "xcode"
+}
 ```
-You: Fix the bug in ContentView.swift and build it
 
-Claude: [Fixes the code]
-Claude: [Runs xcodebuild]
-Claude: ✅ Build succeeded! App is ready for install.
+Or for custom mode:
 
-You: [End conversation]
-
-→ App automatically installs and launches on iPhone 16 Pro simulator
+```json
+{
+  "mode": "custom",
+  "scheme": "MyApp",
+  "destination": {
+    "type": "simulator",
+    "udid": "12345678-ABCD-1234-ABCD-123456789ABC",
+    "name": "iPhone 16 Pro",
+    "platform": "iphonesimulator"
+  }
+}
 ```
 
-## Destination Priority
+## Skills
 
-The plugin automatically detects where to deploy:
-
-1. **Running Simulator** (highest priority) - Uses the currently booted simulator
-2. **Connected Device** - Uses a physically connected iOS device
-3. **Available Simulator** - Falls back to any available iPhone simulator
+| Skill | Description |
+|-------|-------------|
+| `setup` | First-time configuration |
+| `settings` | View/modify current settings |
+| `smart-build` | Build with saved settings |
 
 ## Requirements
 
 - macOS with Xcode installed
 - `sourcekit-lsp` (included with Xcode)
 - For real device deployment: valid signing certificate
-
-## Plugin Structure
-
-```
-swiftui-smart-build/
-├── .claude-plugin/
-│   ├── plugin.json
-│   └── marketplace.json
-├── .lsp.json                 # SourceKit-LSP config
-├── commands/
-│   └── build.md              # /build command
-├── hooks/
-│   └── hooks.json            # Stop hook for auto-install
-├── scripts/
-│   ├── auto-install.sh
-│   └── mark-ready-to-install.sh
-└── skills/
-    └── smart-build/
-        └── SKILL.md
-```
 
 ## License
 

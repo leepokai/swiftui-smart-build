@@ -8,7 +8,14 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(claude plugin validate --help:*)",
       "Bash(claude plugin --help:*)",
-      "Bash(claude plugin validate:*)"
+      "Bash(claude plugin validate:*)",
+      "Bash(git add:*)",
+      "Bash(git restore:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git tag:*)",
+      "Bash(plutil:*)",
+      "Bash(xcrun simctl list:*)"
     ]
   }
 }
