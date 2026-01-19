@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.2] - 2025-01-20
+
+### Fixed
+- Commands now explicitly tell Claude to read skill files at exact paths
+- Prevents Claude from improvising instead of following skill instructions
+
 ## [1.2.1] - 2025-01-19
 
 ### Fixed
@@ -63,7 +69,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - iOS Simulator deployment
 - Physical device deployment (iOS 17+ via `devicectl`)
 
-[Unreleased]: https://github.com/leepokai/swiftui-smart-build/compare/v1.2.1...HEAD
+[Unreleased]: https://github.com/leepokai/swiftui-smart-build/compare/v1.2.2...HEAD
+[1.2.2]: https://github.com/leepokai/swiftui-smart-build/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/leepokai/swiftui-smart-build/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/leepokai/swiftui-smart-build/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/leepokai/swiftui-smart-build/compare/v1.0.0...v1.1.0
