@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2025-01-19
+
+### Added
+- **Setup skill** (`/swiftui-smart-build:setup`) - First-time configuration wizard
+- **Settings skill** (`/swiftui-smart-build:settings`) - View and modify build settings
+- **Xcode Sync mode** - Automatically read scheme and destination from Xcode's current selection
+- **Custom mode** - Specify fixed scheme and destination
+- `get-xcode-settings.sh` script to read Xcode's UserInterfaceState
+
+### Changed
+- Device names in documentation replaced with generic examples
+- All documentation now in English only
+
 ## [1.0.0] - 2025-01-18
 
 ### Added
@@ -28,5 +41,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - iOS Simulator deployment
 - Physical device deployment (iOS 17+ via `devicectl`)
 
-[Unreleased]: https://github.com/leepokai/swiftui-smart-build/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/leepokai/swiftui-smart-build/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/leepokai/swiftui-smart-build/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/leepokai/swiftui-smart-build/releases/tag/v1.0.0
