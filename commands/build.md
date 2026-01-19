@@ -2,6 +2,6 @@
 description: Build the Swift/SwiftUI project (build only, no install)
 ---
 
-Load and follow the `smart-build` skill, but only execute the build step. Do not mark for install or auto-deploy.
+Read the skill file at `${CLAUDE_PLUGIN_ROOT}/skills/smart-build/SKILL.md` and follow its instructions.
 
-After build succeeds, report the result and stop.
+Only execute the build step (Steps 0-3). Do NOT mark for install or run install commands.

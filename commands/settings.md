@@ -2,4 +2,4 @@
 description: View or modify Smart Build settings
 ---
 
-Load and follow the `settings` skill to view or modify the current Smart Build configuration.
+Read the skill file at `${CLAUDE_PLUGIN_ROOT}/skills/settings/SKILL.md` and follow its instructions exactly.
