@@ -1,6 +1,6 @@
 ---
 name: settings
-description: View or modify Smart Build settings. Use when user wants to check current config, change scheme, change destination, or switch between Xcode sync and custom mode.
+description: This skill should be used when the user asks to "show settings", "change build settings", "switch to xcode mode", "change destination", "view config", or uses the /settings command. View or modify Smart Build configuration.
 ---
 
 # Smart Build Settings

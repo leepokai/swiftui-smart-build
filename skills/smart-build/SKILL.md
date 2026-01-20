@@ -1,6 +1,6 @@
 ---
 name: smart-build
-description: Build Swift/SwiftUI projects and mark for auto-deploy. App launches automatically when conversation ends.
+description: This skill should be used when the user asks to "build the app", "run the app", "build and run", "deploy to simulator", "build this project", or uses the /build, /run, /install commands. Builds Swift/SwiftUI projects and marks for auto-deploy.
 ---
 
 # Smart Build Skill

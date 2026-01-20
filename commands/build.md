@@ -2,12 +2,6 @@
 description: Build the Swift/SwiftUI project (build only, no auto-install)
 ---
 
-**YOU MUST read the skill file first:**
+Build the app without marking for auto-install. Use the smart-build skill but only execute Steps 1-4.
 
-```bash
-cat ${CLAUDE_PLUGIN_ROOT}/skills/smart-build/SKILL.md
-```
-
-Then follow ONLY Steps 1-4 (build) in that skill file EXACTLY as written. Do NOT execute Steps 5-6.
-
-This command only builds. The app will NOT auto-install when conversation ends.
+The app will NOT auto-install when conversation ends.

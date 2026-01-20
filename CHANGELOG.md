@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.3] - 2025-01-20
+
+### Fixed
+- Skill descriptions now use proper format with trigger phrases for auto-discovery
+- Commands simplified to describe intent, letting skills auto-load based on description match
+
 ## [1.3.2] - 2025-01-20
 
 ### Fixed
@@ -103,7 +109,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - iOS Simulator deployment
 - Physical device deployment (iOS 17+ via `devicectl`)
 
-[Unreleased]: https://github.com/leepokai/swiftui-smart-build/compare/v1.3.2...HEAD
+[Unreleased]: https://github.com/leepokai/swiftui-smart-build/compare/v1.3.3...HEAD
+[1.3.3]: https://github.com/leepokai/swiftui-smart-build/compare/v1.3.2...v1.3.3
 [1.3.2]: https://github.com/leepokai/swiftui-smart-build/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/leepokai/swiftui-smart-build/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/leepokai/swiftui-smart-build/compare/v1.2.2...v1.3.0

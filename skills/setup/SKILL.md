@@ -1,6 +1,6 @@
 ---
 name: setup
-description: First-time setup for Smart Build. Configure build settings - choose between Xcode sync or custom mode.
+description: This skill should be used when the user asks to "setup smart build", "configure build settings", "initialize smart build", "run setup", or uses the /setup command. First-time configuration for Smart Build plugin.
 ---
 
 # Smart Build Setup Skill
