@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+- Removed unused scripts: `install.sh`, `launch.sh`, `test-stop-hook.sh`
+- These were duplicated in `auto-install.sh` or only used for debugging
+
+## [1.4.0] - 2025-01-20
+
+### Added
+- `check-project.sh` - Check if current directory has Xcode project
+- `create-config.sh` - Create .smart-build.json via script (not LLM)
+- `list-schemes.sh` - List available schemes from project
+- `list-destinations.sh` - List available simulators and devices
+
+### Changed
+- Setup skill now uses scripts for all operations
+- LLM no longer constructs JSON or searches for files manually
+- All file operations are handled by bash scripts for reliability
+
 ## [1.3.4] - 2025-01-20
 
 ### Fixed
@@ -115,7 +132,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - iOS Simulator deployment
 - Physical device deployment (iOS 17+ via `devicectl`)
 
-[Unreleased]: https://github.com/leepokai/swiftui-smart-build/compare/v1.3.4...HEAD
+[Unreleased]: https://github.com/leepokai/swiftui-smart-build/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/leepokai/swiftui-smart-build/compare/v1.3.4...v1.4.0
 [1.3.4]: https://github.com/leepokai/swiftui-smart-build/compare/v1.3.3...v1.3.4
 [1.3.3]: https://github.com/leepokai/swiftui-smart-build/compare/v1.3.2...v1.3.3
 [1.3.2]: https://github.com/leepokai/swiftui-smart-build/compare/v1.3.1...v1.3.2
