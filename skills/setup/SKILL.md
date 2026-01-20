@@ -5,14 +5,21 @@ description: This skill should be used when the user asks to "setup smart build"
 
 # Smart Build Setup Skill
 
-**YOU MUST follow these instructions EXACTLY. Do NOT improvise or skip steps.**
+## ⚠️ CRITICAL: READ THIS FIRST
 
-## CRITICAL RULES
+**YOU MUST follow these instructions EXACTLY as written.**
 
-1. **YOU MUST check for .xcodeproj first** - Do NOT create config if no project found
-2. **YOU MUST use AskUserQuestion** - Do NOT assume user's preference
-3. **YOU MUST use the exact config format** - Do NOT add extra fields
-4. **YOU MUST use `get-xcode-settings.sh`** for showing Xcode settings - Do NOT use AppleScript
+**DO NOT:**
+- ❌ Use Search or Glob tools - use the exact bash commands shown
+- ❌ Skip steps or change the order
+- ❌ Assume user preferences - YOU MUST use AskUserQuestion
+- ❌ Use AppleScript or osascript
+- ❌ Improvise or use alternative methods
+
+**YOU MUST:**
+- ✅ Run the EXACT bash commands shown in each step
+- ✅ Use AskUserQuestion to ask user for mode preference
+- ✅ Follow the step order: 1 → 2 → 3 → 4
 
 ---
 

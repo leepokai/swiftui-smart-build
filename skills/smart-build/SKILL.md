@@ -5,15 +5,21 @@ description: This skill should be used when the user asks to "build the app", "r
 
 # Smart Build Skill
 
-**YOU MUST follow these instructions EXACTLY. Do NOT improvise or use alternative methods.**
+## ⚠️ CRITICAL: READ THIS FIRST
 
-## CRITICAL RULES
+**YOU MUST follow these instructions EXACTLY as written.**
 
-1. **YOU MUST use the scripts provided** - Do NOT construct xcodebuild commands yourself
-2. **YOU MUST read `.smart-build.json`** - Do NOT ask user for scheme/destination if config exists
-3. **YOU MUST use `get-xcode-settings.sh`** for Xcode mode - Do NOT use AppleScript or other methods
-4. **YOU MUST call `mark-ready-to-install.sh`** after successful build - This enables auto-deploy on conversation end
-5. **YOU MUST follow the exact step order** - Do NOT skip steps or change the order
+**DO NOT:**
+- ❌ Use Search or Glob tools - use the exact bash commands shown
+- ❌ Construct xcodebuild commands yourself - use the scripts provided
+- ❌ Use AppleScript or osascript
+- ❌ Skip steps or change the order
+- ❌ Improvise or use alternative methods
+
+**YOU MUST:**
+- ✅ Run the EXACT bash commands and scripts shown in each step
+- ✅ Use `${CLAUDE_PLUGIN_ROOT}/scripts/` for all operations
+- ✅ Follow the step order: 1 → 2 → 3 → 4 → 5 → 6
 
 ---
 
