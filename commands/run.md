@@ -2,8 +2,12 @@
 description: Build and mark for auto-install (app launches when conversation ends)
 ---
 
-Load and follow the `smart-build` skill. YOU MUST follow every step exactly as written.
+**YOU MUST read the skill file first:**
 
-Execute ALL steps (1-6): build → find app → mark ready for install.
+```bash
+cat ${CLAUDE_PLUGIN_ROOT}/skills/smart-build/SKILL.md
+```
+
+Then follow every step (1-6) in that skill file EXACTLY as written. Do NOT improvise.
 
 The app will automatically install and launch when this conversation ends.

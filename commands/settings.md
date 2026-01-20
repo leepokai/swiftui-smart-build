@@ -2,4 +2,10 @@
 description: View or modify Smart Build settings
 ---
 
-Load and follow the `settings` skill. YOU MUST follow every step exactly as written in the skill.
+**YOU MUST read the skill file first:**
+
+```bash
+cat ${CLAUDE_PLUGIN_ROOT}/skills/settings/SKILL.md
+```
+
+Then follow every step in that skill file EXACTLY as written. Do NOT improvise.
