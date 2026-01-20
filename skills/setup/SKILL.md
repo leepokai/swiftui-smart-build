@@ -1,151 +1,159 @@
 ---
 name: setup
-description: First-time setup for Smart Build. Run this when user first uses the plugin or wants to configure build settings. Ask user to choose between Xcode sync mode or custom settings.
+description: First-time setup for Smart Build. Configure build settings - choose between Xcode sync or custom mode.
 ---
 
-# Smart Build Setup
+# Smart Build Setup Skill
 
-First-time configuration for the Smart Build plugin.
+**YOU MUST follow these instructions EXACTLY. Do NOT improvise or skip steps.**
 
-## When to Use
+## CRITICAL RULES
 
-- User's first time using smart-build in this project
-- No `.smart-build.json` exists in the project root
-- User explicitly asks to setup or configure smart-build
+1. **YOU MUST check for .xcodeproj first** - Do NOT create config if no project found
+2. **YOU MUST use AskUserQuestion** - Do NOT assume user's preference
+3. **YOU MUST use the exact config format** - Do NOT add extra fields
+4. **YOU MUST use `get-xcode-settings.sh`** for showing Xcode settings - Do NOT use AppleScript
 
-## ⚠️ IMPORTANT: Check Directory First
+---
 
-Before doing anything, verify user is in a valid Xcode project directory:
+## Step 1: Check Project Directory
 
-```bash
-# Check for Xcode project
-ls *.xcodeproj 2>/dev/null || ls *.xcworkspace 2>/dev/null
-```
-
-**If no project found**:
-- STOP and warn the user:
-  "⚠️ No Xcode project found in current directory.
-   Please run Claude from your project folder:
-
-   cd /path/to/YourApp
-   claude
-
-   Then run /swiftui-smart-build@leepokai:setup again."
-- Do NOT create .smart-build.json
-
-**If project found**: Continue with setup.
-
-## Setup Flow
-
-### Step 1: Check for existing config
+**YOU MUST run this command first:**
 
 ```bash
-# Check if config exists
-cat .smart-build.json 2>/dev/null
+ls *.xcodeproj 2>/dev/null || ls *.xcworkspace 2>/dev/null || echo "NO_PROJECT"
 ```
 
-If exists, tell user current settings and ask if they want to change.
+**If output is "NO_PROJECT":** STOP and tell user:
+> "No Xcode project found. Please run Claude from your project directory:
+> ```
+> cd /path/to/YourApp
+> claude
+> ```
+> Then run `/swiftui-smart-build:setup` again."
 
-### Step 2: Ask user preference
+**Do NOT proceed if no project found.**
 
-Use AskUserQuestion to ask:
+---
 
-**Question**: "How do you want Smart Build to determine build settings?"
+## Step 2: Check Existing Config
 
-**Options**:
-1. **Xcode Sync** (Recommended) - Automatically use whatever scheme and destination is selected in Xcode
-2. **Custom** - Specify a fixed scheme and destination
+**YOU MUST run:**
 
-### Step 3A: If Xcode Sync mode
+```bash
+cat .smart-build.json 2>/dev/null || echo "NO_CONFIG"
+```
 
-1. Read current Xcode settings to show user:
+**If config exists:** Show current settings and ask if user wants to reconfigure.
+
+**If "NO_CONFIG":** Continue to Step 3.
+
+---
+
+## Step 3: Ask User Preference
+
+**YOU MUST use AskUserQuestion with these exact options:**
+
+```
+Question: "How should Smart Build determine your build settings?"
+
+Options:
+1. "Xcode Sync (Recommended)" - Automatically use whatever is selected in Xcode
+2. "Custom" - Specify a fixed scheme and destination
+```
+
+---
+
+## Step 4A: Xcode Sync Mode
+
+If user chose **Xcode Sync**:
+
+1. **Show current Xcode settings:**
 ```bash
 ${CLAUDE_PLUGIN_ROOT}/scripts/get-xcode-settings.sh
 ```
 
-2. Create config file:
+2. **Create config file with EXACTLY this format:**
 ```json
 {
-  "mode": "xcode",
-  "projectPath": null
+  "mode": "xcode"
 }
 ```
 
-3. Tell user: "Smart Build will now sync with Xcode. Currently: [scheme] → [destination]"
+3. **Write to file:**
+```bash
+echo '{"mode": "xcode"}' > .smart-build.json
+```
 
-### Step 3B: If Custom mode
+4. **Tell user:** "Setup complete! Smart Build will sync with Xcode."
 
-1. List available schemes:
+---
+
+## Step 4B: Custom Mode
+
+If user chose **Custom**:
+
+1. **List available schemes:**
 ```bash
 xcodebuild -project *.xcodeproj -list -json 2>/dev/null | jq -r '.project.schemes[]'
-# or for workspace
-xcodebuild -workspace *.xcworkspace -list -json 2>/dev/null | jq -r '.workspace.schemes[]'
 ```
 
-2. Ask user to pick a scheme
+2. **Ask user to pick a scheme** using AskUserQuestion
 
-3. List available destinations:
+3. **List available simulators:**
 ```bash
-# Booted simulators
-xcrun simctl list devices booted -j | jq -r '.devices[][] | "\(.name) (Simulator) - \(.udid)"'
-
-# Available simulators
-xcrun simctl list devices available -j | jq -r '.devices[][] | select(.name | contains("iPhone")) | "\(.name) (Simulator) - \(.udid)"' | head -10
-
-# Connected devices
-xcrun devicectl list devices -j 2>/dev/null | jq -r '.result.devices[] | "\(.deviceProperties.name) (Device) - \(.identifier)"'
+xcrun simctl list devices available -j | jq -r '.devices[][] | select(.isAvailable==true) | select(.name | contains("iPhone")) | "\(.name) - \(.udid)"' | head -10
 ```
 
-4. Ask user to pick a destination
+4. **Ask user to pick a destination** using AskUserQuestion
 
-5. Create config file:
+5. **Create config file with EXACTLY this format:**
 ```json
 {
   "mode": "custom",
-  "scheme": "UserSelectedScheme",
+  "scheme": "<USER_SELECTED_SCHEME>",
   "destination": {
     "type": "simulator",
-    "udid": "12345678-ABCD-1234-ABCD-123456789ABC",
-    "name": "iPhone 16 Pro",
+    "name": "<DEVICE_NAME>",
+    "udid": "<DEVICE_UDID>",
     "platform": "iphonesimulator"
   }
 }
 ```
 
-### Step 4: Save config
+6. **Write config to `.smart-build.json`**
 
-Write the config to `.smart-build.json` in the project root.
+---
 
-### Step 5: Confirm
+## Config Format
 
-Tell user:
-- "Setup complete!"
-- "Your builds will now use: [scheme] → [destination]"
-- "Run `/swiftui-smart-build:settings` anytime to change this"
-
-## Example Conversation
-
+**Xcode mode (simple):**
+```json
+{
+  "mode": "xcode"
+}
 ```
-User: /swiftui-smart-build:setup
 
-Claude: I'll help you set up Smart Build for this project.
-
-How do you want to determine build settings?
-
-[Xcode Sync] - Automatically use Xcode's current scheme and destination
-[Custom] - Specify a fixed scheme and destination
-
-User: Xcode Sync
-
-Claude: Reading your Xcode settings...
-
-Current Xcode configuration:
-- Scheme: SmartBuildTest
-- Destination: iPhone 16 Pro (Simulator)
-
-I've saved this preference. Smart Build will now automatically sync with
-whatever you have selected in Xcode.
-
-Setup complete! When you build, it will use your Xcode settings.
-Run /swiftui-smart-build:settings anytime to change this.
+**Custom mode:**
+```json
+{
+  "mode": "custom",
+  "scheme": "MyApp",
+  "destination": {
+    "type": "simulator",
+    "name": "iPhone 16 Pro",
+    "udid": "12345678-ABCD-1234-ABCD-123456789ABC",
+    "platform": "iphonesimulator"
+  }
+}
 ```
+
+---
+
+## DO NOT
+
+❌ Do NOT add fields like `xcodeSync`, `projectPath`, `defaultScheme`, `defaultDestination`
+❌ Do NOT use AppleScript to get Xcode settings
+❌ Do NOT skip asking user for their preference
+❌ Do NOT create config if no .xcodeproj found
+❌ Do NOT use any format other than what is specified above

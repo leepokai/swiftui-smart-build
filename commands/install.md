@@ -2,6 +2,6 @@
 description: Install and launch the last built app on simulator/device
 ---
 
-Read the skill file at `${CLAUDE_PLUGIN_ROOT}/skills/smart-build/SKILL.md` for context.
+Load and follow the `smart-build` skill. YOU MUST follow every step exactly as written.
 
-Skip the build step. Only execute install and launch for the most recently built app in DerivedData.
+**IMPORTANT:** Skip Steps 1-4 (build). Only execute Steps 5-7 (find app, install, launch).

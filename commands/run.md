@@ -2,6 +2,6 @@
 description: Build, install, and launch the app (complete workflow)
 ---
 
-Read the skill file at `${CLAUDE_PLUGIN_ROOT}/skills/smart-build/SKILL.md` and follow its instructions exactly.
+Load and follow the `smart-build` skill. YOU MUST follow every step exactly as written.
 
-Execute all steps: build, then install and launch immediately (do not wait for Stop hook).
+Execute ALL steps (1-7): build → find app → install → launch.

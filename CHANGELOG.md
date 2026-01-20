@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2025-01-20
+
+### Added
+- New scripts for better control: `build.sh`, `install.sh`, `launch.sh`, `find-app.sh`
+- Scripts handle all xcodebuild and simctl operations
+
+### Changed
+- Skills now use strong language (YOU MUST) to ensure Claude follows instructions exactly
+- Skills now call scripts instead of inline bash commands
+- Commands simplified to load skills with emphasis on following instructions
+- Reduced reliance on LLM improvisation
+
+### Fixed
+- Claude no longer uses AppleScript or constructs xcodebuild commands manually
+- Config format strictly enforced (`mode: xcode` or `mode: custom`)
+
 ## [1.2.2] - 2025-01-20
 
 ### Fixed
@@ -69,7 +85,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - iOS Simulator deployment
 - Physical device deployment (iOS 17+ via `devicectl`)
 
-[Unreleased]: https://github.com/leepokai/swiftui-smart-build/compare/v1.2.2...HEAD
+[Unreleased]: https://github.com/leepokai/swiftui-smart-build/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/leepokai/swiftui-smart-build/compare/v1.2.2...v1.3.0
 [1.2.2]: https://github.com/leepokai/swiftui-smart-build/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/leepokai/swiftui-smart-build/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/leepokai/swiftui-smart-build/compare/v1.1.0...v1.2.0
