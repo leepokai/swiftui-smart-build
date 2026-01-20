@@ -1,6 +1,6 @@
 ---
 name: smart-build
-description: Build Swift/SwiftUI projects and deploy to simulator or device. Use when user wants to build, run, or deploy.
+description: Build Swift/SwiftUI projects and mark for auto-deploy. App launches automatically when conversation ends.
 ---
 
 # Smart Build Skill
@@ -12,7 +12,8 @@ description: Build Swift/SwiftUI projects and deploy to simulator or device. Use
 1. **YOU MUST use the scripts provided** - Do NOT construct xcodebuild commands yourself
 2. **YOU MUST read `.smart-build.json`** - Do NOT ask user for scheme/destination if config exists
 3. **YOU MUST use `get-xcode-settings.sh`** for Xcode mode - Do NOT use AppleScript or other methods
-4. **YOU MUST follow the exact step order** - Do NOT skip steps or change the order
+4. **YOU MUST call `mark-ready-to-install.sh`** after successful build - This enables auto-deploy on conversation end
+5. **YOU MUST follow the exact step order** - Do NOT skip steps or change the order
 
 ---
 
@@ -78,7 +79,7 @@ Where:
 ${CLAUDE_PLUGIN_ROOT}/scripts/build.sh "MyApp" "platform=iOS Simulator,name=iPhone 16 Pro"
 ```
 
-**If build fails:** Show the error and offer to fix the code. Do NOT proceed to install.
+**If build fails:** Show the error and offer to fix the code. Do NOT proceed to Step 5.
 
 **If build succeeds:** Continue to Step 5.
 
@@ -101,42 +102,37 @@ Where:
 ${CLAUDE_PLUGIN_ROOT}/scripts/find-app.sh "MyApp" "iphonesimulator"
 ```
 
-This returns JSON with `app_path` and `bundle_id`. Save these for install.
+This returns JSON with `app_path` and `bundle_id`. Save these for Step 6.
 
 ---
 
-## Step 6: Install
+## Step 6: Mark Ready for Install
 
-**YOU MUST use the install script:**
+**YOU MUST run this script to enable auto-deploy:**
 
 ```bash
-${CLAUDE_PLUGIN_ROOT}/scripts/install.sh "<DEVICE_TYPE>" "<DEVICE_NAME>" "<APP_PATH>"
+${CLAUDE_PLUGIN_ROOT}/scripts/mark-ready-to-install.sh "<APP_PATH>" "<BUNDLE_ID>" "<DEVICE_TYPE>" "<DEVICE_UDID>" "<DEVICE_NAME>"
 ```
 
 Where:
+- `<APP_PATH>` = app_path from Step 5
+- `<BUNDLE_ID>` = bundle_id from Step 5
 - `<DEVICE_TYPE>` = `simulator` or `device`
-- `<DEVICE_NAME>` = device name, e.g., `iPhone 16 Pro`
-- `<APP_PATH>` = path from Step 5
+- `<DEVICE_UDID>` = device UDID from Step 3
+- `<DEVICE_NAME>` = device name from Step 3
 
 **Example:**
 ```bash
-${CLAUDE_PLUGIN_ROOT}/scripts/install.sh "simulator" "iPhone 16 Pro" "/path/to/MyApp.app"
+${CLAUDE_PLUGIN_ROOT}/scripts/mark-ready-to-install.sh \
+  "/Users/.../MyApp.app" \
+  "com.example.MyApp" \
+  "simulator" \
+  "12345678-ABCD-1234-ABCD-123456789ABC" \
+  "iPhone 16 Pro"
 ```
 
----
-
-## Step 7: Launch
-
-**YOU MUST use the launch script:**
-
-```bash
-${CLAUDE_PLUGIN_ROOT}/scripts/launch.sh "<DEVICE_TYPE>" "<DEVICE_NAME>" "<BUNDLE_ID>"
-```
-
-**Example:**
-```bash
-${CLAUDE_PLUGIN_ROOT}/scripts/launch.sh "simulator" "iPhone 16 Pro" "com.example.MyApp"
-```
+**After this step, tell user:**
+> "✅ Build succeeded! Your app will automatically launch when this conversation ends."
 
 ---
 
@@ -155,7 +151,7 @@ Claude: Mode is "xcode"
 
 Claude: [Step 3] Getting Xcode settings...
 Claude: [Runs] ${CLAUDE_PLUGIN_ROOT}/scripts/get-xcode-settings.sh
-Claude: Scheme: SmartBuildTest, Destination: iPhone 16 Pro
+Claude: Scheme: SmartBuildTest, Destination: iPhone 16 Pro (UDID: ABC123)
 
 Claude: [Step 4] Building...
 Claude: [Runs] ${CLAUDE_PLUGIN_ROOT}/scripts/build.sh "SmartBuildTest" "platform=iOS Simulator,name=iPhone 16 Pro"
@@ -163,15 +159,16 @@ Claude: ✅ Build succeeded
 
 Claude: [Step 5] Finding app...
 Claude: [Runs] ${CLAUDE_PLUGIN_ROOT}/scripts/find-app.sh "SmartBuildTest" "iphonesimulator"
-Claude: Found at /Users/.../SmartBuildTest.app
+Claude: Found at /Users/.../SmartBuildTest.app, Bundle ID: com.example.SmartBuildTest
 
-Claude: [Step 6] Installing...
-Claude: [Runs] ${CLAUDE_PLUGIN_ROOT}/scripts/install.sh "simulator" "iPhone 16 Pro" "/Users/.../SmartBuildTest.app"
-Claude: ✅ Installed
+Claude: [Step 6] Marking ready for install...
+Claude: [Runs] ${CLAUDE_PLUGIN_ROOT}/scripts/mark-ready-to-install.sh "/Users/.../SmartBuildTest.app" "com.example.SmartBuildTest" "simulator" "ABC123" "iPhone 16 Pro"
 
-Claude: [Step 7] Launching...
-Claude: [Runs] ${CLAUDE_PLUGIN_ROOT}/scripts/launch.sh "simulator" "iPhone 16 Pro" "com.example.SmartBuildTest"
-Claude: ✅ App is running!
+Claude: ✅ Build succeeded! Your app will automatically launch when this conversation ends.
+
+[User ends conversation]
+[Stop hook runs auto-install.sh]
+[App launches on iPhone 16 Pro simulator]
 ```
 
 ---
@@ -183,3 +180,4 @@ Claude: ✅ App is running!
 ❌ Do NOT modify `.smart-build.json` unless user asks
 ❌ Do NOT skip steps
 ❌ Do NOT use different scripts or methods than specified above
+❌ Do NOT run install or launch commands directly - use mark-ready-to-install.sh instead

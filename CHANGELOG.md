@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.1] - 2025-01-20
+
+### Changed
+- Build and install are now separated: Claude builds during conversation, app installs on conversation end
+- `/run` now builds + marks for auto-install (app launches when conversation ends)
+- `/build` now only builds (no auto-install)
+- `/install` now only marks for install (for already-built apps)
+- Stop hook now properly handles auto-install using marker file
+
+### Fixed
+- Stop hook now actually works (uses mark-ready-to-install.sh → auto-install.sh flow)
+
 ## [1.3.0] - 2025-01-20
 
 ### Added
@@ -85,7 +97,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - iOS Simulator deployment
 - Physical device deployment (iOS 17+ via `devicectl`)
 
-[Unreleased]: https://github.com/leepokai/swiftui-smart-build/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/leepokai/swiftui-smart-build/compare/v1.3.1...HEAD
+[1.3.1]: https://github.com/leepokai/swiftui-smart-build/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/leepokai/swiftui-smart-build/compare/v1.2.2...v1.3.0
 [1.2.2]: https://github.com/leepokai/swiftui-smart-build/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/leepokai/swiftui-smart-build/compare/v1.2.0...v1.2.1
