@@ -1,6 +1,12 @@
-# Build Xcode Project
+# Build → Boot → Install
 
-Build the iOS app using xcodebuild.
+Build your iOS app, auto-boot simulator if needed, and install & launch automatically.
+
+## Flow
+
+```
+xcodebuild → BUILD SUCCEEDED → Hook triggers → Boot simulator → Install .app → Launch
+```
 
 ## Find Project Info
 
@@ -20,7 +26,6 @@ xcrun simctl list devices available
 xcodebuild \
   -scheme "YOUR_SCHEME" \
   -destination "platform=iOS Simulator,name=iPhone 16 Pro" \
-  -configuration Debug \
   build
 ```
 
@@ -30,7 +35,6 @@ xcodebuild \
 xcodebuild \
   -scheme "YOUR_SCHEME" \
   -destination "generic/platform=iOS" \
-  -configuration Debug \
   -allowProvisioningUpdates \
   build
 ```
@@ -45,7 +49,13 @@ xcodebuild \
   build
 ```
 
-## Notes
+## What Happens Automatically
 
-- After a successful build (BUILD SUCCEEDED), the app will be **automatically installed** via hook
-- The compiled .app is in `~/Library/Developer/Xcode/DerivedData/`
+When build succeeds (`BUILD SUCCEEDED`), the hook will:
+
+1. Find the most recently built `.app` in DerivedData
+2. Boot the target simulator (if not already running)
+3. Install the app
+4. Launch the app
+
+No manual steps needed!
