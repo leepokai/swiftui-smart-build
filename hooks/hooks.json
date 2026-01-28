@@ -1,22 +1,13 @@
 {
   "hooks": {
-    "Stop": [
+    "PostToolUse": [
       {
+        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/auto-install.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/post-build-install.sh",
             "timeout": 120
-          }
-        ]
-      }
-    ],
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "rm -f /tmp/.claude-install-ready-${CLAUDE_SESSION_ID:-default}.json 2>/dev/null || true"
           }
         ]
       }
