@@ -21,9 +21,9 @@ When working with Swift/SwiftUI files, follow best practices from:
 @swiftui-smart-build:swiftui-best-practice
 
 Key reminders:
-- After EACH .swift edit, use swift-lsp getDiagnostics to check errors immediately
-- Before session ends, run xcodebuild once (auto-install will deploy the app)
-- Use Instruments to profile performance issues
+- Syntax & format errors are auto-checked after each edit (via PostToolUse hook)
+- Before building, run LSP getDiagnostics once for full type checking
+- After xcodebuild succeeds, app auto-installs to device/simulator
 - Keep view bodies simple and computation-free
 ```
 
@@ -272,9 +272,21 @@ When something doesn't work:
 
 ---
 
-## Auto-Install Hook Requirements
+## Plugin Hooks
 
-The `post-build-install.sh` hook automatically installs and launches your app after a successful build. For it to work correctly:
+This plugin provides two automatic hooks:
+
+### 1. Swift Lint Check (PostToolUse: Edit/Write)
+
+Runs automatically after every `.swift` file edit:
+- **Syntax check**: `swiftc -parse` - catches parse errors
+- **Auto-format**: `swiftformat` - automatically fixes style issues (only when syntax is OK)
+
+Errors are displayed immediately. Format issues are auto-fixed.
+
+### 2. Auto-Install (PostToolUse: Bash)
+
+The `post-build-install.sh` hook automatically installs and launches your app after a successful build.
 
 ### Prerequisites
 
@@ -283,12 +295,24 @@ The `post-build-install.sh` hook automatically installs and launches your app af
    brew install jq
    ```
 
-2. **Swift LSP for real-time diagnostics** (auto-configured)
+2. **swiftformat** (optional, for auto-formatting)
+   ```bash
+   brew install swiftformat
+   ```
+
+3. **.swift-version file** (recommended for swiftformat)
+   Create a `.swift-version` file in your project root to specify your Swift version:
+   ```bash
+   echo "6.0" > .swift-version
+   ```
+   This enables version-specific formatting rules and eliminates warnings.
+
+4. **Swift LSP for type checking** (auto-configured)
    - This plugin automatically configures `sourcekit-lsp` for Swift diagnostics
    - Requires: macOS with Xcode installed (sourcekit-lsp is built-in)
-   - Usage: `mcp__ide__getDiagnostics` after editing `.swift` files
+   - Usage: `mcp__ide__getDiagnostics` before building for full type check
 
-3. **Simulator should be running** (recommended)
+5. **Simulator should be running** (recommended)
    - The hook will try to boot one if none is running, but it's faster if already booted
    - Use `open -a Simulator` before building
 
@@ -325,51 +349,64 @@ If auto-install doesn't work:
 
 ### During the Session (After Each Edit)
 
-Every time you modify a `.swift` file, **immediately** check with LSP:
+The plugin automatically checks your code after each `.swift` file edit via PostToolUse hook:
+
+1. **Syntax check** (`swiftc -parse`) - catches parse errors instantly
+2. **Auto-format** (`swiftformat`) - automatically fixes style issues
+
+These run automatically - no manual action needed. Syntax errors are reported; format issues are auto-fixed.
+
+**Loop**: Edit → (auto syntax/format check) → Fix if needed → Edit → ...
+
+### Before Building (Type Check)
+
+Before running `xcodebuild`, use LSP for full type checking:
 
 ```
 mcp__ide__getDiagnostics with uri: "file:///path/to/YourFile.swift"
 ```
 
-> **Note**: LSP is auto-configured by this plugin. Requires Xcode installed on macOS.
-
-This catches errors instantly without building:
-- Syntax errors
+This catches errors that syntax-only checking misses:
 - Type mismatches
 - Missing imports
 - Protocol conformance issues
 - Concurrency warnings (Swift 6)
+- Undefined symbols
 
-**Loop**: Edit → LSP Check → Fix → Edit → LSP Check → ...
+> **Note**: LSP is auto-configured by this plugin. Requires Xcode installed on macOS.
 
-### Before Ending the Session (Final Build)
+### Final Build
 
-**IMPORTANT**: Before the conversation ends, run `xcodebuild` once:
+Run `xcodebuild` to compile and auto-deploy:
 
 ```bash
 xcodebuild -scheme "APP" -destination "platform=iOS Simulator,name=iPhone 16 Pro" build
 ```
 
-This ensures:
-1. All changes compile together correctly
-2. The auto-install hook deploys the app automatically
-3. User can immediately test the changes
+The post-build hook automatically installs and launches the app.
 
 ### Summary
 
 ```
 ┌─────────────────────────────────────────────────┐
-│  During Session                                 │
-│  ─────────────────                              │
-│  Edit .swift → LSP getDiagnostics → Fix errors  │
+│  During Editing (Automatic)                     │
+│  ──────────────────────────                     │
+│  Edit .swift → Hook: swiftc -parse              │
+│             → Hook: swiftformat (auto-fix)      │
+│             → Fix syntax errors if any          │
 │       ↑                                    │    │
 │       └────────────────────────────────────┘    │
-│                    (repeat)                     │
 └─────────────────────────────────────────────────┘
                       ↓
 ┌─────────────────────────────────────────────────┐
-│  Before Session Ends                            │
-│  ───────────────────                            │
+│  Before Build (Manual)                          │
+│  ─────────────────────                          │
+│  LSP getDiagnostics → Fix type errors           │
+└─────────────────────────────────────────────────┘
+                      ↓
+┌─────────────────────────────────────────────────┐
+│  Build & Deploy (Automatic)                     │
+│  ──────────────────────────                     │
 │  xcodebuild → BUILD SUCCEEDED → Auto Install    │
 └─────────────────────────────────────────────────┘
 ```

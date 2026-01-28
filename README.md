@@ -1,14 +1,21 @@
 # SwiftUI Smart Build
 
-Claude Code plugin that automatically installs and launches your iOS app after a successful `xcodebuild`.
+Claude Code plugin for Swift/SwiftUI development with automatic code checking and app deployment.
 
 ## How It Works
 
-1. You ask Claude to build your Xcode project
-2. When the build succeeds (detects "BUILD SUCCEEDED"), the plugin automatically:
-   - Finds the compiled `.app` in DerivedData
-   - Boots a simulator if none is running
-   - Installs and launches the app
+### Auto Check & Format (on Edit/Write)
+
+When you edit a `.swift` file, the plugin automatically:
+- Runs `swiftc -parse` to catch syntax errors
+- Runs `swiftformat` to auto-fix style issues (only when syntax is OK)
+
+### Auto Install (on Build Success)
+
+When `xcodebuild` succeeds, the plugin automatically:
+- Finds the compiled `.app` in DerivedData
+- Boots a simulator if none is running
+- Installs and launches the app
 
 ## Installation
 
@@ -96,13 +103,15 @@ BUILD SUCCEEDED
 
 | Requirement | Why | Install |
 |-------------|-----|---------|
+| **swiftformat** | Auto-format on edit | `brew install swiftformat` |
 | **ios-deploy** | Install to physical devices | `brew install ios-deploy` |
 | **Simulator running** | Faster install (auto-boots if not running) | `open -a Simulator` |
 
 ### Included Features
 
-- **Swift LSP**: Auto-configured via `.lsp.json` (uses Xcode's built-in `sourcekit-lsp`)
+- **Swift lint hook**: Auto-checks syntax (`swiftc -parse`) and auto-formats (`swiftformat`) after each edit
 - **Auto-install hook**: Detects "BUILD SUCCEEDED" and deploys to simulator/device
+- **Swift LSP**: Auto-configured via `.lsp.json` (uses Xcode's built-in `sourcekit-lsp`)
 - **Multi-simulator support**: Prioritizes booted simulator when multiple exist
 
 ## License
