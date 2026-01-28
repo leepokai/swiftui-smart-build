@@ -20,7 +20,8 @@ claude plugin add leepokai/swiftui-smart-build
 
 | Command | Description |
 |---------|-------------|
-| `/build-boot-install` | Build Xcode project → auto boot simulator → install & launch app |
+| `/simulator-build-boot-install` | Build → boot simulator → install & launch |
+| `/device-build-boot-install` | Build → install to connected device → launch |
 
 ## Skills
 

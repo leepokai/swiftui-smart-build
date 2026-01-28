@@ -201,16 +201,16 @@ if [ "$DEVICE_TYPE" = "simulator" ]; then
 else
     echo "📱 Target: Physical device"
 
-    # Find connected device
-    DEVICE_INFO=$(xcrun devicectl list devices 2>/dev/null | grep -E "^[A-F0-9-]{36}" | head -1)
-    DEVICE_UDID=$(echo "$DEVICE_INFO" | awk '{print $1}')
+    # Find connected device - extract UUID using regex (handles spaces in device names)
+    DEVICE_UDID=$(xcrun devicectl list devices 2>/dev/null | grep -oE "[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}" | head -1)
 
     if [ -z "$DEVICE_UDID" ]; then
         echo "❌ No connected device found"
         exit 1
     fi
 
-    DEVICE_NAME=$(xcrun devicectl list devices 2>/dev/null | grep "$DEVICE_UDID" | awk '{$1=""; print $0}' | xargs)
+    # Get device name from the line containing the UDID
+    DEVICE_NAME=$(xcrun devicectl list devices 2>/dev/null | grep "$DEVICE_UDID" | sed 's/   .*//')
     echo "📱 Device: $DEVICE_NAME"
 
     echo ""

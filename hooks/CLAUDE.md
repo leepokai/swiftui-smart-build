@@ -7,13 +7,14 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #3830 | 7:04 PM | 🔵 | Claude Code Plugin Hook Location Requirement | ~306 |
 | #3829 | 7:01 PM | 🟣 | Unified build-boot-install command for SwiftUI development workflow | ~387 |
-| #3823 | 6:55 PM | 🔵 | Boot simulator command documentation for iOS development workflows | ~383 |
+| #3805 | 6:14 PM | 🔴 | Fixed post-build-install.sh to detect DebugLocal configuration from scheme name | ~409 |
+| #3804 | 6:13 PM | 🔵 | Plugin hook post-build-install.sh examined for automatic iOS app installation | ~443 |
 
 ### Jan 29, 2026
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
 | #3846 | 1:47 AM | 🟣 | Post-build hook system validated and working for iOS simulator installation | ~315 |
-| #3842 | 1:44 AM | 🟣 | Added Physical Device Build-Install-Launch Command Documentation | ~431 |
 </claude-mem-context>
