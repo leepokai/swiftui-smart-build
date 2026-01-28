@@ -1,0 +1,11 @@
+{
+  "simulator": {
+    "scheme": "Signalsurf-DebugLocal",
+    "device": "iPhone 16e",
+    "ios_version": "iOS 26.2",
+    "udid": "24A2580F-BABB-49D2-91EA-2B14498A4246"
+  },
+  "device": {
+    "scheme": "Signalsurf-DebugRemote"
+  }
+}

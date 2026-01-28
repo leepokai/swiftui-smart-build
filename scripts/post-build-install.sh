@@ -4,7 +4,9 @@
 # Triggered after every Bash tool call, checks if it was a successful build
 
 # Debug log file
-DEBUG_LOG="/tmp/post-build-install-debug.log"
+LOG_DIR="/tmp/swiftui-smart-build"
+mkdir -p "$LOG_DIR"
+DEBUG_LOG="$LOG_DIR/post-build-install.log"
 
 # Check if jq is installed
 if ! command -v jq &> /dev/null; then
@@ -33,13 +35,19 @@ if [ "$TOOL_NAME" != "Bash" ]; then
     exit 0
 fi
 
+# Check if this is an xcodebuild command
+if ! echo "$TOOL_INPUT" | grep -q "xcodebuild"; then
+    echo "EXIT: Not an xcodebuild command" >> "$DEBUG_LOG"
+    exit 0
+fi
+
 # Check if the output contains BUILD SUCCEEDED (xcodebuild success marker)
 if ! echo "$TOOL_RESULT" | grep -q "BUILD SUCCEEDED"; then
     echo "EXIT: No BUILD SUCCEEDED found in output" >> "$DEBUG_LOG"
     exit 0
 fi
 
-echo "PASSED: BUILD SUCCEEDED detected!" >> "$DEBUG_LOG"
+echo "PASSED: xcodebuild with BUILD SUCCEEDED detected!" >> "$DEBUG_LOG"
 
 # Try to extract scheme from xcodebuild command
 SCHEME=$(echo "$TOOL_INPUT" | grep -oE '\-scheme\s+"?([^"]+)"?' | sed 's/-scheme[[:space:]]*"*\([^"]*\)"*/\1/' | head -1)
@@ -123,11 +131,23 @@ echo "🔖 Bundle: $BUNDLE_ID"
 # ============================================================
 
 if [ "$DEVICE_TYPE" = "simulator" ]; then
+    # Try to extract UDID directly from destination (most precise)
+    SIM_UDID_FROM_DEST=$(echo "$DESTINATION" | grep -oE 'id=[A-F0-9-]+' | sed 's/id=//' | head -1)
+
     # Try to extract simulator name from destination
     SIM_NAME=$(echo "$DESTINATION" | grep -oE 'name=[^,]+' | sed 's/name=//' | head -1)
 
+    echo "SIM_UDID_FROM_DEST: $SIM_UDID_FROM_DEST" >> "$DEBUG_LOG"
+    echo "SIM_NAME: $SIM_NAME" >> "$DEBUG_LOG"
+
+    # PRIORITY 0: Use UDID from destination if specified (most precise)
+    if [ -n "$SIM_UDID_FROM_DEST" ]; then
+        SIM_UDID="$SIM_UDID_FROM_DEST"
+        echo "Using UDID from destination: $SIM_UDID" >> "$DEBUG_LOG"
+    fi
+
     # PRIORITY 1: Find a BOOTED simulator matching the name
-    if [ -n "$SIM_NAME" ]; then
+    if [ -z "$SIM_UDID" ] && [ -n "$SIM_NAME" ]; then
         SIM_UDID=$(xcrun simctl list devices -j 2>/dev/null | jq -r ".devices[][] | select(.name == \"$SIM_NAME\" and .state == \"Booted\") | .udid" 2>/dev/null | head -1)
     fi
 
@@ -141,9 +161,9 @@ if [ "$DEVICE_TYPE" = "simulator" ]; then
         SIM_UDID=$(xcrun simctl list devices available -j 2>/dev/null | jq -r ".devices[][] | select(.name == \"$SIM_NAME\" and .isAvailable == true) | .udid" 2>/dev/null | head -1)
     fi
 
-    # If still not found, boot the first available iPhone
+    # PRIORITY 4: If still not found, use the first available iPhone
     if [ -z "$SIM_UDID" ]; then
-        echo "🔍 No booted simulator, finding one to boot..."
+        echo "🔍 No simulator specified, finding one..."
         SIM_INFO=$(xcrun simctl list devices available -j 2>/dev/null | jq -r '.devices[][] | select(.isAvailable == true and (.name | contains("iPhone"))) | "\(.udid) \(.name)"' 2>/dev/null | head -1)
         SIM_UDID=$(echo "$SIM_INFO" | awk '{print $1}')
         SIM_NAME=$(echo "$SIM_INFO" | cut -d' ' -f2-)
@@ -152,10 +172,42 @@ if [ "$DEVICE_TYPE" = "simulator" ]; then
             echo "❌ No available simulator found"
             exit 1
         fi
+    fi
 
-        echo "🚀 Booting: $SIM_NAME"
-        xcrun simctl boot "$SIM_UDID" 2>/dev/null || true
+    echo "Target UDID: $SIM_UDID" >> "$DEBUG_LOG"
+
+    # ============================================================
+    # BOOT SIMULATOR IF NEEDED
+    # ============================================================
+    # Check if the target simulator is already booted
+    SIM_STATE=$(xcrun simctl list devices -j 2>/dev/null | jq -r ".devices[][] | select(.udid == \"$SIM_UDID\") | .state" 2>/dev/null)
+    echo "SIM_STATE: $SIM_STATE" >> "$DEBUG_LOG"
+
+    if [ "$SIM_STATE" != "Booted" ]; then
+        # Get simulator name for display
+        if [ -z "$SIM_NAME" ]; then
+            SIM_NAME=$(xcrun simctl list devices -j 2>/dev/null | jq -r ".devices[][] | select(.udid == \"$SIM_UDID\") | .name" 2>/dev/null)
+        fi
+
+        echo "🚀 Booting: $SIM_NAME ($SIM_UDID)"
+        BOOT_OUTPUT=$(xcrun simctl boot "$SIM_UDID" 2>&1)
+        BOOT_EXIT=$?
+
+        # Check if boot succeeded or already booted
+        if [ $BOOT_EXIT -ne 0 ]; then
+            if echo "$BOOT_OUTPUT" | grep -q "Unable to boot device in current state: Booted"; then
+                echo "✅ Already booted"
+            else
+                echo "❌ Failed to boot simulator: $BOOT_OUTPUT"
+                echo "BOOT_OUTPUT: $BOOT_OUTPUT" >> "$DEBUG_LOG"
+                exit 1
+            fi
+        else
+            echo "✅ Booted"
+        fi
         sleep 2
+    else
+        echo "✅ Simulator already running"
     fi
 
     # Open Simulator app

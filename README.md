@@ -32,7 +32,33 @@ When `xcodebuild` succeeds, the plugin automatically:
 | Command | Description |
 |---------|-------------|
 | `/simulator-build-boot-install` | Build → boot simulator → install & launch |
+| `/simulator-build-boot-install revise` | Change simulator/scheme settings |
 | `/device-build-boot-install` | Build → install to connected device → launch |
+| `/device-build-boot-install revise` | Change device scheme settings |
+
+### Build Preferences
+
+On first use, commands will ask you to choose:
+- **Scheme**: Which Xcode scheme to build
+- **iOS Version** (simulator only): Which iOS runtime to use
+- **Device** (simulator only): Which simulator device to use
+
+Preferences are saved to plugin folder (`preferences.json`):
+
+```json
+{
+  "simulator": {
+    "scheme": "MyApp-Debug",
+    "device": "iPhone 16e",
+    "ios_version": "iOS 26.2"
+  },
+  "device": {
+    "scheme": "MyApp-Release"
+  }
+}
+```
+
+Use `revise` argument to change settings anytime.
 
 ## Skills
 

@@ -3,7 +3,9 @@
 # PostToolUse hook: Auto-check Swift files after Edit/Write
 # Quick checks only - full type checking via xcodebuild
 
-DEBUG_LOG="/tmp/swift-lint-check-debug.log"
+LOG_DIR="/tmp/swiftui-smart-build"
+mkdir -p "$LOG_DIR"
+DEBUG_LOG="$LOG_DIR/swift-lint-check.log"
 
 # Read JSON input from stdin
 INPUT_JSON=$(cat)
