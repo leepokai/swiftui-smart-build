@@ -1,6 +1,6 @@
 {
   "name": "swiftui-smart-build",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Auto-install iOS apps after xcodebuild + SwiftUI best practices",
   "author": {
     "name": "leepokai"
