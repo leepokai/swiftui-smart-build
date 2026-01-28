@@ -73,9 +73,26 @@ BUILD SUCCEEDED
 
 ## Requirements
 
-- Xcode with command line tools
-- `jq` (for JSON parsing): `brew install jq`
-- For physical devices: `ios-deploy` (optional): `brew install ios-deploy`
+### Required
+
+| Requirement | Why | Install |
+|-------------|-----|---------|
+| **macOS** | iOS development only works on Mac | - |
+| **Xcode** | Build tools + sourcekit-lsp (built-in) | App Store or [developer.apple.com](https://developer.apple.com/xcode/) |
+| **jq** | JSON parsing for hook scripts | `brew install jq` |
+
+### Optional
+
+| Requirement | Why | Install |
+|-------------|-----|---------|
+| **ios-deploy** | Install to physical devices | `brew install ios-deploy` |
+| **Simulator running** | Faster install (auto-boots if not running) | `open -a Simulator` |
+
+### Included Features
+
+- **Swift LSP**: Auto-configured via `.lsp.json` (uses Xcode's built-in `sourcekit-lsp`)
+- **Auto-install hook**: Detects "BUILD SUCCEEDED" and deploys to simulator/device
+- **Multi-simulator support**: Prioritizes booted simulator when multiple exist
 
 ## License
 

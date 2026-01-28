@@ -1,6 +1,9 @@
-# SwiftUI Build Best Practice
+---
+name: swiftui-best-practice
+description: SwiftUI development best practices, performance optimization, and build workflow. Use when working with .swift files or SwiftUI views.
+---
 
-> **Trigger**: When working with `.swift` files, especially SwiftUI views, or when user asks about SwiftUI development.
+# SwiftUI Build Best Practice
 
 ## Auto-Load Setup
 
@@ -269,6 +272,55 @@ When something doesn't work:
 
 ---
 
+## Auto-Install Hook Requirements
+
+The `post-build-install.sh` hook automatically installs and launches your app after a successful build. For it to work correctly:
+
+### Prerequisites
+
+1. **jq must be installed** (for JSON parsing)
+   ```bash
+   brew install jq
+   ```
+
+2. **Swift LSP for real-time diagnostics** (auto-configured)
+   - This plugin automatically configures `sourcekit-lsp` for Swift diagnostics
+   - Requires: macOS with Xcode installed (sourcekit-lsp is built-in)
+   - Usage: `mcp__ide__getDiagnostics` after editing `.swift` files
+
+3. **Simulator should be running** (recommended)
+   - The hook will try to boot one if none is running, but it's faster if already booted
+   - Use `open -a Simulator` before building
+
+### How It Finds Your App
+
+The hook automatically finds the most recently built `.app` in DerivedData:
+1. Searches `Build/Products/*-<platform>/` directories
+2. Sorts by modification time (most recent first)
+3. Works with **any scheme or configuration naming** - no hardcoded assumptions
+
+### Edge Cases
+
+| Scenario | Behavior |
+|----------|----------|
+| Any scheme naming convention | Works - finds by modification time, not config name |
+| Multiple simulators with same name | Hook prioritizes the **booted** one |
+| No simulator running | Hook boots the first available iPhone |
+| Build output piped (e.g., `\| tail -3`) | Still works - hook reads from Claude's JSON input |
+| Physical device build | Uses `xcrun devicectl` or `ios-deploy` |
+| No device/simulator available | Hook exits gracefully with warning |
+| Multiple projects in DerivedData | Uses most recently modified .app |
+
+### Troubleshooting
+
+If auto-install doesn't work:
+
+1. **Check debug log**: `cat /tmp/post-build-install-debug.log`
+2. **Verify simulator is booted**: `xcrun simctl list devices booted`
+3. **Ensure jq is installed**: `which jq`
+
+---
+
 ## Post-Edit Workflow
 
 ### During the Session (After Each Edit)
@@ -276,8 +328,10 @@ When something doesn't work:
 Every time you modify a `.swift` file, **immediately** check with LSP:
 
 ```
-mcp__lsp__getDiagnostics with uri: "file:///path/to/YourFile.swift"
+mcp__ide__getDiagnostics with uri: "file:///path/to/YourFile.swift"
 ```
+
+> **Note**: LSP is auto-configured by this plugin. Requires Xcode installed on macOS.
 
 This catches errors instantly without building:
 - Syntax errors

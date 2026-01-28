@@ -3,19 +3,43 @@
 # PostToolUse hook: Auto-install after successful xcodebuild
 # Triggered after every Bash tool call, checks if it was a successful build
 
+# Debug log file
+DEBUG_LOG="/tmp/post-build-install-debug.log"
+
+# Check if jq is installed
+if ! command -v jq &> /dev/null; then
+    echo "⚠️  jq not installed. Run: brew install jq" >> "$DEBUG_LOG"
+    exit 0
+fi
+
+# Read JSON input from stdin
+INPUT_JSON=$(cat)
+
+echo "========== $(date) ==========" >> "$DEBUG_LOG"
+echo "INPUT_JSON: $INPUT_JSON" >> "$DEBUG_LOG"
+
+# Parse JSON using jq
+TOOL_NAME=$(echo "$INPUT_JSON" | jq -r '.tool_name // empty')
+TOOL_INPUT=$(echo "$INPUT_JSON" | jq -r '.tool_input.command // empty')
+TOOL_RESULT=$(echo "$INPUT_JSON" | jq -r '.tool_response.stdout // empty')
+
+echo "TOOL_NAME: $TOOL_NAME" >> "$DEBUG_LOG"
+echo "TOOL_INPUT: $TOOL_INPUT" >> "$DEBUG_LOG"
+echo "TOOL_RESULT (first 500 chars): ${TOOL_RESULT:0:500}" >> "$DEBUG_LOG"
+
 # Only process Bash tool calls
-if [ "$CLAUDE_TOOL_NAME" != "Bash" ]; then
+if [ "$TOOL_NAME" != "Bash" ]; then
+    echo "EXIT: Not a Bash tool call (got: $TOOL_NAME)" >> "$DEBUG_LOG"
     exit 0
 fi
 
 # Check if the output contains BUILD SUCCEEDED (xcodebuild success marker)
-if ! echo "$CLAUDE_TOOL_RESULT" | grep -q "BUILD SUCCEEDED"; then
+if ! echo "$TOOL_RESULT" | grep -q "BUILD SUCCEEDED"; then
+    echo "EXIT: No BUILD SUCCEEDED found in output" >> "$DEBUG_LOG"
     exit 0
 fi
 
-# Extract info from the build output
-TOOL_INPUT="$CLAUDE_TOOL_INPUT"
-TOOL_RESULT="$CLAUDE_TOOL_RESULT"
+echo "PASSED: BUILD SUCCEEDED detected!" >> "$DEBUG_LOG"
 
 # Try to extract scheme from xcodebuild command
 SCHEME=$(echo "$TOOL_INPUT" | grep -oE '\-scheme\s+"?([^"]+)"?' | sed 's/-scheme[[:space:]]*"*\([^"]*\)"*/\1/' | head -1)
@@ -34,7 +58,11 @@ if [ -z "$SCHEME" ]; then
     SCHEME=$(echo "$TOOL_RESULT" | grep -oE 'Scheme:\s+(.+)' | sed 's/Scheme:[[:space:]]*//' | head -1)
 fi
 
+echo "SCHEME: $SCHEME" >> "$DEBUG_LOG"
+echo "DESTINATION: $DESTINATION" >> "$DEBUG_LOG"
+
 if [ -z "$SCHEME" ]; then
+    echo "EXIT: Could not determine scheme" >> "$DEBUG_LOG"
     echo "⚠️  Could not determine scheme from build command"
     exit 0
 fi
@@ -53,12 +81,30 @@ echo "📦 Auto-installing after successful build"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # Find the app in DerivedData
-PRODUCT_DIR="Debug-$PLATFORM"
-APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -path "*/$PRODUCT_DIR/$SCHEME.app" -type d 2>/dev/null | head -1)
+# Strategy: Find the most recently modified .app matching the platform
+
+echo "PLATFORM: $PLATFORM" >> "$DEBUG_LOG"
+
+# Method 1: Try to find .app in Build/Products/*-$PLATFORM directory, sorted by modification time
+# Exclude Index.noindex (Xcode indexing) and other non-product directories
+APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -path "*/Build/Products/*-$PLATFORM/*.app" -name "*.app" -type d 2>/dev/null | grep -v "Index.noindex" | while read app; do
+    # Get modification time and path
+    stat -f "%m %N" "$app" 2>/dev/null
+done | sort -rn | head -1 | cut -d' ' -f2-)
+
+echo "APP_PATH (by mtime): $APP_PATH" >> "$DEBUG_LOG"
+
+# Method 2: If not found, try any Build/Products directory
+if [ -z "$APP_PATH" ] || [ ! -d "$APP_PATH" ]; then
+    APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -path "*/Build/Products/*.app" -name "*.app" -type d 2>/dev/null | grep -v "Index.noindex" | while read app; do
+        stat -f "%m %N" "$app" 2>/dev/null
+    done | sort -rn | head -1 | cut -d' ' -f2-)
+    echo "APP_PATH (fallback): $APP_PATH" >> "$DEBUG_LOG"
+fi
 
 if [ -z "$APP_PATH" ] || [ ! -d "$APP_PATH" ]; then
-    echo "⚠️  App not found: $SCHEME.app in $PRODUCT_DIR"
-    echo "    Searched in: ~/Library/Developer/Xcode/DerivedData"
+    echo "EXIT: No .app found in DerivedData" >> "$DEBUG_LOG"
+    echo "⚠️  App not found in DerivedData"
     exit 0
 fi
 
@@ -80,14 +126,19 @@ if [ "$DEVICE_TYPE" = "simulator" ]; then
     # Try to extract simulator name from destination
     SIM_NAME=$(echo "$DESTINATION" | grep -oE 'name=[^,]+' | sed 's/name=//' | head -1)
 
-    # Find simulator UDID
+    # PRIORITY 1: Find a BOOTED simulator matching the name
     if [ -n "$SIM_NAME" ]; then
-        SIM_UDID=$(xcrun simctl list devices available -j 2>/dev/null | jq -r ".devices[][] | select(.name == \"$SIM_NAME\" and .isAvailable == true) | .udid" 2>/dev/null | head -1)
+        SIM_UDID=$(xcrun simctl list devices -j 2>/dev/null | jq -r ".devices[][] | select(.name == \"$SIM_NAME\" and .state == \"Booted\") | .udid" 2>/dev/null | head -1)
     fi
 
-    # If not found, use any booted simulator
+    # PRIORITY 2: Use any booted simulator
     if [ -z "$SIM_UDID" ]; then
-        SIM_UDID=$(xcrun simctl list devices booted -j 2>/dev/null | jq -r '.devices[][] | select(.state == "Booted") | .udid' 2>/dev/null | head -1)
+        SIM_UDID=$(xcrun simctl list devices -j 2>/dev/null | jq -r '.devices[][] | select(.state == "Booted") | .udid' 2>/dev/null | head -1)
+    fi
+
+    # PRIORITY 3: Find available simulator matching name (will need to boot)
+    if [ -z "$SIM_UDID" ] && [ -n "$SIM_NAME" ]; then
+        SIM_UDID=$(xcrun simctl list devices available -j 2>/dev/null | jq -r ".devices[][] | select(.name == \"$SIM_NAME\" and .isAvailable == true) | .udid" 2>/dev/null | head -1)
     fi
 
     # If still not found, boot the first available iPhone

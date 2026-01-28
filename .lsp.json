@@ -1,0 +1,14 @@
+{
+  "lspServers": {
+    "swift": {
+      "command": "sourcekit-lsp",
+      "args": [],
+      "extensionToLanguage": {
+        ".swift": "swift"
+      },
+      "transport": "stdio",
+      "restartOnCrash": true,
+      "maxRestarts": 3
+    }
+  }
+}
