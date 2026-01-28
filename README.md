@@ -19,20 +19,12 @@ When `xcodebuild` succeeds, the plugin automatically:
 
 ## Installation
 
-### Option 1: Via Marketplace (Recommended)
-
 ```bash
 # Add the marketplace
 /plugin marketplace add leepokai/swiftui-smart-build
 
 # Install the plugin
 /plugin install swiftui-smart-build@leepokai
-```
-
-### Option 2: Direct Install
-
-```bash
-/plugin add leepokai/swiftui-smart-build
 ```
 
 ## Commands
