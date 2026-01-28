@@ -12,6 +12,21 @@ Claude Code plugin that automatically installs and launches your iOS app after a
 
 ## Installation
 
+### Option 1: Add Marketplace (Recommended)
+
+```bash
+# Add the marketplace first
+claude mcp add-json leepokai-marketplace '{
+  "type": "url",
+  "url": "https://raw.githubusercontent.com/leepokai/swiftui-smart-build/main/.claude-plugin/marketplace.json"
+}'
+
+# Then install the plugin
+claude plugin install swiftui-smart-build@leepokai
+```
+
+### Option 2: Direct Install
+
 ```bash
 claude plugin add leepokai/swiftui-smart-build
 ```
