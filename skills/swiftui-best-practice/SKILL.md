@@ -18,7 +18,8 @@ When working with Swift/SwiftUI files, follow best practices from:
 @swiftui-smart-build:swiftui-best-practice
 
 Key reminders:
-- After modifying SwiftUI code, always rebuild to verify changes
+- After EACH .swift edit, use swift-lsp getDiagnostics to check errors immediately
+- Before session ends, run xcodebuild once (auto-install will deploy the app)
 - Use Instruments to profile performance issues
 - Keep view bodies simple and computation-free
 ```
@@ -270,16 +271,54 @@ When something doesn't work:
 
 ## Post-Edit Workflow
 
-After modifying SwiftUI code, ALWAYS:
+### During the Session (After Each Edit)
+
+Every time you modify a `.swift` file, **immediately** check with LSP:
 
 ```
-1. ⌘B  → Build to check for errors
-2. ⌘R  → Run to verify behavior
-3. 👁️  → Check preview if available
-4. 📱  → Test on real device for performance
+mcp__lsp__getDiagnostics with uri: "file:///path/to/YourFile.swift"
 ```
 
-**Remember**: The auto-install hook will deploy your app automatically after a successful build!
+This catches errors instantly without building:
+- Syntax errors
+- Type mismatches
+- Missing imports
+- Protocol conformance issues
+- Concurrency warnings (Swift 6)
+
+**Loop**: Edit → LSP Check → Fix → Edit → LSP Check → ...
+
+### Before Ending the Session (Final Build)
+
+**IMPORTANT**: Before the conversation ends, run `xcodebuild` once:
+
+```bash
+xcodebuild -scheme "APP" -destination "platform=iOS Simulator,name=iPhone 16 Pro" build
+```
+
+This ensures:
+1. All changes compile together correctly
+2. The auto-install hook deploys the app automatically
+3. User can immediately test the changes
+
+### Summary
+
+```
+┌─────────────────────────────────────────────────┐
+│  During Session                                 │
+│  ─────────────────                              │
+│  Edit .swift → LSP getDiagnostics → Fix errors  │
+│       ↑                                    │    │
+│       └────────────────────────────────────┘    │
+│                    (repeat)                     │
+└─────────────────────────────────────────────────┘
+                      ↓
+┌─────────────────────────────────────────────────┐
+│  Before Session Ends                            │
+│  ───────────────────                            │
+│  xcodebuild → BUILD SUCCEEDED → Auto Install    │
+└─────────────────────────────────────────────────┘
+```
 
 ---
 
