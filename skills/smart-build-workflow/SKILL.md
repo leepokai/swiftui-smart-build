@@ -14,11 +14,11 @@ Automated build workflow for iOS development with syntax checking, auto-formatti
 ### 1. Check Preferences (REQUIRED FIRST STEP)
 
 ```bash
-cat "$CLAUDE_PLUGIN_ROOT/preferences.json" 2>/dev/null
+find "$CLAUDE_PLUGIN_ROOT" -name "preferences.json"
 ```
 
-**⚠️ CRITICAL**: If preferences.json does NOT exist or the command returns empty:
-- You MUST run the setup flow in `@references/setup-flow.md` BEFORE proceeding
+**⚠️ CRITICAL**: If no file is found:
+- You MUST run the setup flow in `@../../references/setup-flow.md` BEFORE proceeding
 - DO NOT skip this step - build will fail without proper preferences
 - DO NOT guess or hardcode values - follow the interactive setup
 

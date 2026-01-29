@@ -1,6 +1,6 @@
 # Preferences Setup Flow
 
-Run this setup when `preferences.json` doesn't exist or when user requests `/simulator-build-boot-install revise`.
+Run this setup when `preferences.json` is not found or when user requests to revise preferences.
 
 ## Step 1: List Available Options
 
