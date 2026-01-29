@@ -39,7 +39,7 @@ Use **AskUserQuestion** tool to ask which device. Parse the chosen device's UDID
 
 ## Step 5: Save Preferences
 
-Save to `$CLAUDE_PLUGIN_ROOT/preferences.json`, filling in user's choices from previous steps:
+The `$CLAUDE_PLUGIN_ROOT` directory already exists. Save directly to `$CLAUDE_PLUGIN_ROOT/preferences.json`, filling in user's choices from previous steps:
 
 **Simulator** saves to `simulator` section, **Device** saves to `device` section. Preserve existing sections when updating.
 
