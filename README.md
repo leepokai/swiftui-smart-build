@@ -2,20 +2,63 @@
 
 Claude Code plugin for Swift/SwiftUI development with automatic code checking and app deployment.
 
+## Why This Plugin?
+
+### The Problem
+
+When using AI to write Swift code, you often face:
+
+1. **Endless context switching** - AI writes code → switch to Xcode → build fails → switch back to AI → fix → repeat
+2. **Build failures from AI-generated code** - AI doesn't know about syntax errors until you try to build
+3. **Manual deployment** - After each build, manually install and launch the app
+
+### The Solution
+
+This plugin creates a **tight feedback loop** that catches errors early and deploys automatically:
+
+| Without Plugin | With Plugin |
+|----------------|-------------|
+| AI edits → Build → Fail → Fix → Build → Fail → ... | AI edits → **Instant syntax check** → Fix → Build → **Auto-deploy** |
+| 5-10 build attempts to get it right | **Higher first-build success rate** |
+| Switch between AI IDE ↔ Xcode ↔ Simulator | **Stay in AI IDE**, app appears automatically |
+
+### Time Saved
+
+- **No more Xcode switching** - Syntax errors caught instantly after each edit
+- **No more manual deployment** - App installs and launches automatically after build
+- **Fewer build cycles** - Catch errors before building, not after
+
+---
+
 ## How It Works
 
 ### Auto Check & Format (on Edit/Write)
 
 When you edit a `.swift` file, the plugin automatically:
-- Runs `swiftc -parse` to catch syntax errors
+- Runs `swiftc -parse` to catch syntax errors (~0.1s)
 - Runs `swiftformat` to auto-fix style issues (only when syntax is OK)
+
+Errors appear immediately - no need to wait for a full build.
+
+### Pre-Build Type Check
+
+Before building, run global diagnostics:
+```
+mcp__ide__getDiagnostics()
+```
+
+Catches type errors, missing imports, and protocol issues before the build starts.
 
 ### Auto Install (on Build Success)
 
 When `xcodebuild` succeeds, the plugin automatically:
-- Finds the compiled `.app` in DerivedData
-- Boots a simulator if none is running
-- Installs and launches the app
+- Boots the target simulator (using saved UDID for precision)
+- Installs the compiled `.app`
+- Launches the app
+
+**You stay in the AI IDE. The app just appears on the simulator.**
+
+---
 
 ## Installation
 
@@ -26,6 +69,8 @@ When `xcodebuild` succeeds, the plugin automatically:
 # Install the plugin
 /plugin install swiftui-smart-build@leepokai
 ```
+
+---
 
 ## Commands
 
@@ -40,8 +85,9 @@ When `xcodebuild` succeeds, the plugin automatically:
 
 On first use, commands will ask you to choose:
 - **Scheme**: Which Xcode scheme to build
-- **iOS Version** (simulator only): Which iOS runtime to use
-- **Device** (simulator only): Which simulator device to use
+- **iOS Version**: Which iOS runtime to use
+- **Device**: Which simulator device to use
+- **UDID**: Auto-saved for precise simulator targeting
 
 Preferences are saved to plugin folder (`preferences.json`):
 
@@ -50,7 +96,8 @@ Preferences are saved to plugin folder (`preferences.json`):
   "simulator": {
     "scheme": "MyApp-Debug",
     "device": "iPhone 16e",
-    "ios_version": "iOS 26.2"
+    "ios_version": "iOS 26.2",
+    "udid": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
   },
   "device": {
     "scheme": "MyApp-Release"
@@ -60,28 +107,48 @@ Preferences are saved to plugin folder (`preferences.json`):
 
 Use `revise` argument to change settings anytime.
 
+---
+
 ## Skills
 
 | Skill | Description |
 |-------|-------------|
-| `/swiftui-best-practice` | SwiftUI development best practices (Swift 6.x / 2025) |
+| `/smart-build-workflow` | Build workflow guide with hooks documentation |
 
-### Auto-Load Best Practices
-
-When you first use `/swiftui-best-practice`, you'll be asked:
-
-> Would you like to enable auto-load for SwiftUI best practices?
-
-If you agree, the skill will be added to your project's `CLAUDE.md`, so Claude automatically follows these practices when working with Swift files.
+---
 
 ## Usage
 
-Just build your project normally:
+### First Time Setup
+
+Load the workflow skill to configure your build preferences:
+
+```
+/smart-build-workflow
+```
+
+The skill will:
+1. Check if `preferences.json` exists
+2. If not found, guide you through interactive setup:
+   - Choose your build scheme
+   - Choose iOS version
+   - Choose simulator device
+   - Save preferences with UDID for precise targeting
+
+To change settings later, use:
+
+```
+/simulator-build-boot-install revise
+```
+
+### Building Your App
+
+After setup, just build your project:
 
 ```
 > Build my app for the simulator
 
-Claude runs: xcodebuild -scheme MyApp -destination 'platform=iOS Simulator,name=iPhone 16 Pro' build
+Claude runs: xcodebuild -scheme MyApp -destination 'platform=iOS Simulator,id=XXXX' build
 
 BUILD SUCCEEDED
 
@@ -90,7 +157,10 @@ BUILD SUCCEEDED
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📍 Found: MyApp.app
 🔖 Bundle: com.example.MyApp
-📱 Target: iPhone 16 Pro
+📱 Target: iPhone 16e (iOS 26.2)
+
+🚀 Booting: iPhone 16e
+✅ Booted
 
 📲 Installing...
 ✅ Installed
@@ -98,14 +168,49 @@ BUILD SUCCEEDED
 🎬 Launching...
 ✅ Launched
 
-🎉 App running on iPhone 16 Pro
+🎉 App running on iPhone 16e
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
+---
+
+## Workflow
+
+```
+┌─────────────────────────────────────────────────┐
+│  During Editing (Automatic)                     │
+│  ──────────────────────────                     │
+│  Edit .swift → swiftc -parse (instant check)    │
+│             → swiftformat (auto-fix)            │
+│  Errors shown immediately, no build needed      │
+└─────────────────────────────────────────────────┘
+                      ↓
+┌─────────────────────────────────────────────────┐
+│  Pre-Build (Manual)                             │
+│  ─────────────────                              │
+│  mcp__ide__getDiagnostics() → type check        │
+│  Catch type errors before building              │
+└─────────────────────────────────────────────────┘
+                      ↓
+┌─────────────────────────────────────────────────┐
+│  Build & Deploy (Automatic)                     │
+│  ──────────────────────────                     │
+│  xcodebuild → BUILD SUCCEEDED                   │
+│  → Boot simulator (if needed)                   │
+│  → Install app                                  │
+│  → Launch app                                   │
+│  Stay in AI IDE, app appears on simulator       │
+└─────────────────────────────────────────────────┘
+```
+
+---
+
 ## Supported Targets
 
-- **iOS Simulator**: Auto-boots if needed
+- **iOS Simulator**: Auto-boots the correct simulator using saved UDID
 - **Physical iOS Device**: Requires device to be connected and trusted
+
+---
 
 ## Requirements
 
@@ -123,14 +228,19 @@ BUILD SUCCEEDED
 |-------------|-----|---------|
 | **swiftformat** | Auto-format on edit | `brew install swiftformat` |
 | **ios-deploy** | Install to physical devices | `brew install ios-deploy` |
-| **Simulator running** | Faster install (auto-boots if not running) | `open -a Simulator` |
 
-### Included Features
+---
 
-- **Swift lint hook**: Auto-checks syntax (`swiftc -parse`) and auto-formats (`swiftformat`) after each edit
+## Included Features
+
+- **Swift syntax hook**: Auto-checks syntax (`swiftc -parse`) after each edit (~0.1s)
+- **Swift format hook**: Auto-formats (`swiftformat`) when syntax is OK
+- **Preferences validator**: Validates `preferences.json` after edit
 - **Auto-install hook**: Detects "BUILD SUCCEEDED" and deploys to simulator/device
-- **Swift LSP**: Auto-configured via `.lsp.json` (uses Xcode's built-in `sourcekit-lsp`)
-- **Multi-simulator support**: Prioritizes booted simulator when multiple exist
+- **UDID-based targeting**: Boots the exact simulator you configured, not a random one
+- **Swift LSP**: Auto-configured via `.lsp.json` for pre-build type checking
+
+---
 
 ## License
 
