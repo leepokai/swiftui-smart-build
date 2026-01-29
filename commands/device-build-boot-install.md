@@ -23,7 +23,9 @@ Look for preferences file at: `$CLAUDE_PLUGIN_ROOT/preferences.json`
 {
   "simulator": {
     "scheme": "SCHEME_NAME",
-    "device": "iPhone 16e"
+    "device": "iPhone 16e",
+    "ios_version": "iOS 26.2",
+    "udid": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
   },
   "device": {
     "scheme": "SCHEME_NAME"
@@ -76,7 +78,9 @@ xcodebuild \
 {
   "simulator": {
     "scheme": "Signalsurf-DebugLocal",
-    "device": "iPhone 16e"
+    "device": "iPhone 16e",
+    "ios_version": "iOS 26.2",
+    "udid": "24A2580F-BABB-49D2-91EA-2B14498A4246"
   },
   "device": {
     "scheme": "Signalsurf-DebugRemote"

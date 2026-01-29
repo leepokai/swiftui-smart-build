@@ -24,13 +24,36 @@ cat "$CLAUDE_PLUGIN_ROOT/preferences.json" 2>/dev/null
 
 **If preferences.json exists** → Extract `scheme` and `udid`, then proceed to step 2
 
-### 2. Pre-Build Type Check
+### 2. LSP Quick Check (Optional, Recommended for Large Changes)
 
+Use LSP to verify types BEFORE building - faster than waiting for xcodebuild to fail.
+
+**After adding/modifying functions:**
 ```
-mcp__ide__getDiagnostics()
+LSP hover on new function signature → verify return type resolves
 ```
 
-Fix any type errors before building.
+**After renaming symbols:**
+```
+LSP findReferences on renamed symbol → verify all call sites updated
+```
+
+**After importing new modules:**
+```
+LSP hover on imported type → verify module is available
+```
+
+Example:
+```swift
+// You just added this function
+func fetchUser(id: String) -> User { ... }
+```
+```
+LSP hover at "fetchUser" → Returns "(String) -> User" ✓ types correct
+LSP hover at "User" → Returns "struct User" ✓ type exists
+```
+
+If LSP returns error or empty → fix before building.
 
 ### 3. Build
 
@@ -97,8 +120,9 @@ Validates JSON syntax and required fields.
 └─────────────────────────────────────────────────┘
                       ↓
 ┌─────────────────────────────────────────────────┐
-│  Pre-Build                                      │
-│  mcp__ide__getDiagnostics() → type check        │
+│  Pre-Build (Optional LSP Check)                 │
+│  LSP hover → verify types                       │
+│  LSP findReferences → verify no broken refs     │
 └─────────────────────────────────────────────────┘
                       ↓
 ┌─────────────────────────────────────────────────┐

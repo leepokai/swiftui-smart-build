@@ -1,2 +1,5 @@
 # Ignore CLAUDE.md in all subdirectories (auto-generated)
 **/CLAUDE.md
+
+# User-specific preferences (contains UDID, scheme settings)
+preferences.json

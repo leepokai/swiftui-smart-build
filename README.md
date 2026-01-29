@@ -40,14 +40,16 @@ When you edit a `.swift` file, the plugin automatically:
 
 Errors appear immediately - no need to wait for a full build.
 
-### Pre-Build Type Check
+### Pre-Build LSP Check (Optional)
 
-Before building, run global diagnostics:
+Before building, use LSP to verify types - faster than waiting for xcodebuild:
+
 ```
-mcp__ide__getDiagnostics()
+LSP hover on new function → verify return type resolves
+LSP findReferences on renamed symbol → verify all call sites updated
 ```
 
-Catches type errors, missing imports, and protocol issues before the build starts.
+Catches type errors and broken references before the full build.
 
 ### Auto Install (on Build Success)
 
@@ -238,7 +240,7 @@ BUILD SUCCEEDED
 - **Preferences validator**: Validates `preferences.json` after edit
 - **Auto-install hook**: Detects "BUILD SUCCEEDED" and deploys to simulator/device
 - **UDID-based targeting**: Boots the exact simulator you configured, not a random one
-- **Swift LSP**: Auto-configured via `.lsp.json` for pre-build type checking
+- **LSP integration**: Use `hover` and `findReferences` for pre-build type verification
 
 ---
 
