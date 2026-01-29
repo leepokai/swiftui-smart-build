@@ -2,72 +2,86 @@
 
 Run this setup when `preferences.json` is not found or when user requests to revise preferences.
 
-## Step 1: List Available Options
+**Two modes:**
+- **Simulator** — needs scheme, iOS version, device, UDID
+- **Device** — only needs scheme (skip Steps 2–4)
+
+## Step 1: List Schemes & Ask User to Choose
 
 ```bash
-# List schemes
 xcodebuild -list -json 2>/dev/null | jq -r '.project.schemes[]'
+```
 
-# List iOS versions
+Use **AskUserQuestion** tool to ask which scheme to use.
+
+> **Device setup**: after choosing scheme, skip to Step 5 (Save).
+
+## Step 2: List iOS Versions & Ask User to Choose (Simulator Only)
+
+```bash
 xcrun simctl list runtimes available -j | jq -r '.runtimes[] | select(.platform == "iOS") | .name'
 ```
 
-## Step 2: Ask User to Choose Scheme & iOS Version
+Use **AskUserQuestion** tool to ask which iOS version to target.
 
-Use **AskUserQuestion** tool to ask:
-1. Which scheme to use for simulator builds?
-2. Which iOS version to target?
+## Step 3: List Simulators for Chosen iOS Version (Simulator Only)
 
-## Step 3: List Simulators for Chosen iOS Version
-
-Use the iOS version chosen by user in Step 2:
+Use the iOS version chosen in Step 2:
 
 ```bash
 xcrun simctl list devices "<CHOSEN_IOS_VERSION>" available
 # e.g., xcrun simctl list devices "iOS 26.2" available
 ```
 
-## Step 4: Ask User to Choose Simulator & Save
+## Step 4: Ask User to Choose Simulator (Simulator Only)
 
 Use **AskUserQuestion** tool to ask which device. Parse the chosen device's UDID from the Step 3 output.
 
+## Step 5: Save Preferences
+
 Save to `$CLAUDE_PLUGIN_ROOT/preferences.json`, filling in user's choices from previous steps:
 
-```
-# e.g., user chose scheme "App-DebugLocal", iOS version "iOS 26.2", device "iPhone 16e"
-```
+**Simulator** saves to `simulator` section, **Device** saves to `device` section. Preserve existing sections when updating.
 
 ```json
 {
   "simulator": {
-    "scheme": "App-DebugLocal",
-    "device": "iPhone 16e",
-    "ios_version": "iOS 26.2",
-    "udid": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+    "scheme": "<CHOSEN_SCHEME>",
+    "device": "<CHOSEN_DEVICE>",
+    "ios_version": "<CHOSEN_IOS_VERSION>",
+    "udid": "<DEVICE_UDID>"
   },
   "device": {
-    "scheme": "App-DebugRemote"
+    "scheme": "<CHOSEN_SCHEME>"
   }
 }
 ```
 
-## Step 5: Show Summary
+```
+# e.g., simulator: scheme "App-DebugLocal", iOS "iOS 26.2", device "iPhone 16e"
+# e.g., device: scheme "App-DebugRemote"
+```
+
+## Step 6: Show Summary
 
 Display the saved preferences to the user:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 Simulator Build Settings Saved
+📋 Build Settings Saved
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Scheme:      <CHOSEN_SCHEME>
-iOS Version: <CHOSEN_IOS_VERSION>
-Device:      <CHOSEN_DEVICE>
-UDID:        <DEVICE_UDID>
+iOS Version: <CHOSEN_IOS_VERSION>        ← simulator only
+Device:      <CHOSEN_DEVICE>             ← simulator only
+UDID:        <DEVICE_UDID>               ← simulator only
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-# e.g.,
+# e.g., simulator:
 # Scheme:      App-DebugLocal
 # iOS Version: iOS 26.2
 # Device:      iPhone 16e
 # UDID:        XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+
+# e.g., device:
+# Scheme:      App-DebugRemote
 ```
