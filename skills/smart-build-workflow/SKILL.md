@@ -133,7 +133,9 @@ Validates JSON syntax and required fields.
 
 ---
 
-## Troubleshooting
+## Troubleshooting (Only When User Requests)
+
+Do NOT proactively run troubleshooting steps. Only use when user explicitly asks to debug or check logs.
 
 ```bash
 # Check logs

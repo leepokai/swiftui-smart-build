@@ -20,24 +20,22 @@ Use **AskUserQuestion** tool to ask:
 
 ## Step 3: List Simulators for Chosen iOS Version
 
-```bash
-# Convert iOS version to runtime key (e.g., "iOS 26.2" → "iOS-26-2")
-RUNTIME_KEY="com.apple.CoreSimulator.SimRuntime.iOS-26-2"
-xcrun simctl list devices available -j | jq -r '.devices["'$RUNTIME_KEY'"][] | select(.isAvailable) | .name' | sort -u
-```
-
-## Step 4: Ask User to Choose Simulator
-
-Use **AskUserQuestion** tool to ask which device.
-
-## Step 5: Lookup UDID and Save
+Use the iOS version chosen by user in Step 2:
 
 ```bash
-# Get UDID for device + iOS version
-xcrun simctl list devices available -j | jq -r '.devices["'$RUNTIME_KEY'"][] | select(.name == "DEVICE_NAME" and .isAvailable) | .udid' | head -1
+xcrun simctl list devices "<CHOSEN_IOS_VERSION>" available
+# e.g., xcrun simctl list devices "iOS 26.2" available
 ```
 
-Save to `$CLAUDE_PLUGIN_ROOT/preferences.json`:
+## Step 4: Ask User to Choose Simulator & Save
+
+Use **AskUserQuestion** tool to ask which device. Parse the chosen device's UDID from the Step 3 output.
+
+Save to `$CLAUDE_PLUGIN_ROOT/preferences.json`, filling in user's choices from previous steps:
+
+```
+# e.g., user chose scheme "App-DebugLocal", iOS version "iOS 26.2", device "iPhone 16e"
+```
 
 ```json
 {
@@ -53,15 +51,23 @@ Save to `$CLAUDE_PLUGIN_ROOT/preferences.json`:
 }
 ```
 
-## Step 6: Show Summary
+## Step 5: Show Summary
+
+Display the saved preferences to the user:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📋 Simulator Build Settings Saved
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Scheme:      App-DebugLocal
-iOS Version: iOS 26.2
-Device:      iPhone 16e
-UDID:        XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+Scheme:      <CHOSEN_SCHEME>
+iOS Version: <CHOSEN_IOS_VERSION>
+Device:      <CHOSEN_DEVICE>
+UDID:        <DEVICE_UDID>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# e.g.,
+# Scheme:      App-DebugLocal
+# iOS Version: iOS 26.2
+# Device:      iPhone 16e
+# UDID:        XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
 ```
