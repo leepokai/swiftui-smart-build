@@ -14,15 +14,15 @@ Automated build workflow for iOS development with syntax checking, auto-formatti
 ### 1. Check Preferences (REQUIRED FIRST STEP)
 
 ```bash
-find "$CLAUDE_PLUGIN_ROOT" -name "preferences.json"
+find . -maxdepth 1 -name ".smart-build.json"
 ```
 
-**⚠️ CRITICAL**: If no file is found:
+**⚠️ CRITICAL**: If no file is found in the project root:
 - You MUST run the setup flow in `@../../references/setup-flow.md` BEFORE proceeding
 - DO NOT skip this step - build will fail without proper preferences
 - DO NOT guess or hardcode values - follow the interactive setup
 
-**If preferences.json exists** → Extract `scheme` and `udid`, then proceed to step 2
+**If `.smart-build.json` exists** → Extract `scheme` and `udid`, then proceed to step 2
 
 ### 2. LSP Quick Check (Optional, Recommended for Large Changes)
 
@@ -95,7 +95,7 @@ PRIORITY 3: Available simulator matching name
 PRIORITY 4: First available iPhone
 ```
 
-### Preferences Validator (on Edit/Write preferences.json)
+### Preferences Validator (on Edit/Write .smart-build.json)
 
 Validates JSON syntax and required fields.
 
@@ -106,7 +106,7 @@ Validates JSON syntax and required fields.
 | Command | Description |
 |---------|-------------|
 | `/simulator-build-boot-install` | Build with saved preferences |
-| `/simulator-build-boot-install revise` | Change settings (runs setup flow) |
+| `/simulator-build-boot-install revise` | Revise settings (runs setup flow) |
 | `/device-build-boot-install` | Build for physical device |
 
 ---

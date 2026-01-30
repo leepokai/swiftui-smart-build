@@ -91,7 +91,7 @@ On first use, commands will ask you to choose:
 - **Device**: Which simulator device to use
 - **UDID**: Auto-saved for precise simulator targeting
 
-Preferences are saved to plugin folder (`preferences.json`):
+Preferences are saved to the project root (`.smart-build.json`):
 
 ```json
 {
@@ -130,7 +130,7 @@ Load the workflow skill to configure your build preferences:
 ```
 
 The skill will:
-1. Check if `preferences.json` exists
+1. Check if `.smart-build.json` exists
 2. If not found, guide you through interactive setup:
    - Choose your build scheme
    - Choose iOS version
@@ -237,7 +237,7 @@ BUILD SUCCEEDED
 
 - **Swift syntax hook**: Auto-checks syntax (`swiftc -parse`) after each edit (~0.1s)
 - **Swift format hook**: Auto-formats (`swiftformat`) when syntax is OK
-- **Preferences validator**: Validates `preferences.json` after edit
+- **Preferences validator**: Validates `.smart-build.json` after edit
 - **Auto-install hook**: Detects "BUILD SUCCEEDED" and deploys to simulator/device
 - **UDID-based targeting**: Boots the exact simulator you configured, not a random one
 - **LSP integration**: Use `hover` and `findReferences` for pre-build type verification

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# PostToolUse hook: Validate preferences.json after Edit/Write
+# PostToolUse hook: Validate .smart-build.json after Edit/Write
 # Ensures AI doesn't write invalid JSON structure
 
 LOG_DIR="/tmp/swiftui-smart-build"
@@ -19,8 +19,8 @@ if [ "$TOOL_NAME" != "Edit" ] && [ "$TOOL_NAME" != "Write" ]; then
     exit 0
 fi
 
-# Only process preferences.json in plugin root
-if [[ "$FILE_PATH" != */swiftui-smart-build/preferences.json ]]; then
+# Only process .smart-build.json in plugin root
+if [[ "$FILE_PATH" != */.smart-build.json ]]; then
     exit 0
 fi
 
@@ -39,7 +39,7 @@ ERRORS=""
 # 1. Validate JSON syntax
 # ============================================================
 if ! jq empty "$FILE_PATH" 2>/dev/null; then
-    ERRORS="❌ Invalid JSON syntax in preferences.json"
+    ERRORS="❌ Invalid JSON syntax in .smart-build.json"
     echo "$ERRORS" >> "$DEBUG_LOG"
 
     # Output error to Claude
@@ -73,13 +73,13 @@ if echo "$CONTENT" | jq -e '.simulator' > /dev/null 2>&1; then
     SIM_UDID=$(echo "$CONTENT" | jq -r '.simulator.udid // empty')
 
     if [ -z "$SIM_SCHEME" ]; then
-        ERRORS="$ERRORS\n❌ Missing 'simulator.scheme' in preferences.json"
+        ERRORS="$ERRORS\n❌ Missing 'simulator.scheme' in .smart-build.json"
     fi
     if [ -z "$SIM_DEVICE" ]; then
-        ERRORS="$ERRORS\n❌ Missing 'simulator.device' in preferences.json"
+        ERRORS="$ERRORS\n❌ Missing 'simulator.device' in .smart-build.json"
     fi
     if [ -z "$SIM_IOS_VERSION" ]; then
-        ERRORS="$ERRORS\n❌ Missing 'simulator.ios_version' in preferences.json"
+        ERRORS="$ERRORS\n❌ Missing 'simulator.ios_version' in .smart-build.json"
     fi
 
     # Type check - must be strings
@@ -108,7 +108,7 @@ fi
 # Validate device section if it exists
 if echo "$CONTENT" | jq -e '.device' > /dev/null 2>&1; then
     if [ -z "$DEV_SCHEME" ]; then
-        ERRORS="$ERRORS\n❌ Missing 'device.scheme' in preferences.json"
+        ERRORS="$ERRORS\n❌ Missing 'device.scheme' in .smart-build.json"
     fi
 
     # Type check
@@ -126,7 +126,7 @@ if [ -n "$ERRORS" ]; then
     echo -e "$ERRORS" >> "$DEBUG_LOG"
 
     OUTPUT="━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️  preferences.json validation errors:
+⚠️  .smart-build.json validation errors:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 $(echo -e "$ERRORS")
 
@@ -154,7 +154,7 @@ Expected structure:
 }
 EOF
 else
-    echo "✅ preferences.json is valid" >> "$DEBUG_LOG"
+    echo "✅ .smart-build.json is valid" >> "$DEBUG_LOG"
 fi
 
 exit 0

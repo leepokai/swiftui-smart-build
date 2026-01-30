@@ -11,7 +11,7 @@ Build for iOS Simulator with saved preferences.
 ### Step 1: Check for saved preferences
 
 ```bash
-find "$CLAUDE_PLUGIN_ROOT" -name "preferences.json"
+find . -maxdepth 1 -name ".smart-build.json"
 ```
 
 **If no file is found** OR **no `simulator` section in preferences**:
@@ -22,7 +22,7 @@ find "$CLAUDE_PLUGIN_ROOT" -name "preferences.json"
 
 ### Step 2: Build with saved preferences
 
-Read preferences from `$CLAUDE_PLUGIN_ROOT/preferences.json` and run:
+Read preferences from `.smart-build.json` in the project root and run:
 
 ```bash
 xcodebuild \

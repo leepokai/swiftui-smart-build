@@ -1,6 +1,6 @@
 # Preferences Setup Flow
 
-Run this setup when `preferences.json` is not found or when user requests to revise preferences.
+Run this setup when `.smart-build.json` is not found in the project root or when user requests to revise preferences.
 
 **Two modes:**
 - **Simulator** — needs scheme, iOS version, device, UDID
@@ -39,7 +39,7 @@ Use **AskUserQuestion** tool to ask which device. Parse the chosen device's UDID
 
 ## Step 5: Save Preferences
 
-The `$CLAUDE_PLUGIN_ROOT` directory already exists. Save directly to `$CLAUDE_PLUGIN_ROOT/preferences.json`, filling in user's choices from previous steps:
+Save to `.smart-build.json` in the project root directory, filling in user's choices from previous steps:
 
 **Simulator** saves to `simulator` section, **Device** saves to `device` section. Preserve existing sections when updating.
 

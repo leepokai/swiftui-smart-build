@@ -2,4 +2,4 @@
 **/CLAUDE.md
 
 # User-specific preferences (contains UDID, scheme settings)
-preferences.json
+.smart-build.json
