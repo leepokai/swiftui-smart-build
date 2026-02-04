@@ -10,7 +10,7 @@
   "plugins": [
     {
       "name": "swiftui-smart-build",
-      "source": "./",
+      "source": "./plugin",
       "description": "Auto-install iOS apps after xcodebuild + SwiftUI best practices",
       "version": "2.7.0",
       "author": {
