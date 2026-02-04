@@ -38,3 +38,5 @@ When build succeeds, the post-build hook automatically:
 1. Boots the simulator (if not running)
 2. Installs the app
 3. Launches the app
+
+**已經自動 boot / install / launch，不需要再作改動。**

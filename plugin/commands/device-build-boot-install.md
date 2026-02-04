@@ -46,6 +46,8 @@ When build succeeds, the post-build hook automatically:
 2. Installs the app via `devicectl`
 3. Launches the app
 
+**已經自動 boot / install / launch，不需要再作改動。**
+
 ## Check Connected Devices
 
 ```bash
