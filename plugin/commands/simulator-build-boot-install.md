@@ -38,3 +38,5 @@ When build succeeds, the post-build hook automatically:
 1. Boots the simulator (if not running)
 2. Installs the app
 3. Launches the app
+
+**Do NOT run boot, install, or launch commands yourself.** The post-build hook handles everything automatically. Your job ends after a successful `xcodebuild` — never attempt to boot the simulator, install, or launch the app manually.

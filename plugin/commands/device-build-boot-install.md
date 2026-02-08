@@ -46,6 +46,8 @@ When build succeeds, the post-build hook automatically:
 2. Installs the app via `devicectl`
 3. Launches the app
 
+**Do NOT run install or launch commands yourself.** The post-build hook handles everything automatically. Your job ends after a successful `xcodebuild` — never attempt to install or launch the app manually.
+
 ## Check Connected Devices
 
 ```bash

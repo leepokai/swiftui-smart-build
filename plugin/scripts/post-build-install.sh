@@ -146,22 +146,52 @@ if [ "$DEVICE_TYPE" = "simulator" ]; then
         echo "Using UDID from destination: $SIM_UDID" >> "$DEBUG_LOG"
     fi
 
-    # PRIORITY 1: Find a BOOTED simulator matching the name
+    # PRIORITY 1: Read from .smart-build.json if available (user's saved preference)
+    if [ -z "$SIM_UDID" ]; then
+        SESSION_CWD=$(echo "$INPUT_JSON" | jq -r '.cwd // empty')
+        PROJECT_ROOT="${SESSION_CWD:-$PWD}"
+        PREF_FILE="$PROJECT_ROOT/.smart-build.json"
+
+        if [ -f "$PREF_FILE" ]; then
+            PREF_DEVICE=$(jq -r '.simulator.device // empty' "$PREF_FILE" 2>/dev/null)
+            PREF_IOS_VER=$(jq -r '.simulator.ios_version // empty' "$PREF_FILE" 2>/dev/null)
+            echo "PREF_FILE: $PREF_FILE" >> "$DEBUG_LOG"
+            echo "PREF_DEVICE: $PREF_DEVICE" >> "$DEBUG_LOG"
+            echo "PREF_IOS_VER: $PREF_IOS_VER" >> "$DEBUG_LOG"
+
+            # Match by device name + iOS version (UDID is unstable)
+            if [ -n "$PREF_DEVICE" ] && [ -n "$PREF_IOS_VER" ]; then
+                # ios_version format: "iOS 18.2" → runtime key: "com.apple.CoreSimulator.SimRuntime.iOS-18-2"
+                RUNTIME_KEY="com.apple.CoreSimulator.SimRuntime.$(echo "$PREF_IOS_VER" | sed 's/ /-/g; s/\./-/g')"
+                SIM_UDID=$(xcrun simctl list devices available -j 2>/dev/null | jq -r ".devices[\"$RUNTIME_KEY\"][]? | select(.name == \"$PREF_DEVICE\" and .isAvailable == true) | .udid" 2>/dev/null | head -1)
+                echo "RUNTIME_KEY: $RUNTIME_KEY" >> "$DEBUG_LOG"
+                echo "SIM_UDID from .smart-build.json: $SIM_UDID" >> "$DEBUG_LOG"
+            fi
+
+            # Fallback: use saved device name for subsequent priorities
+            if [ -z "$SIM_UDID" ] && [ -n "$PREF_DEVICE" ]; then
+                SIM_NAME="$PREF_DEVICE"
+                echo "Using device name from .smart-build.json: $SIM_NAME" >> "$DEBUG_LOG"
+            fi
+        fi
+    fi
+
+    # PRIORITY 2: Find a BOOTED simulator matching the name
     if [ -z "$SIM_UDID" ] && [ -n "$SIM_NAME" ]; then
         SIM_UDID=$(xcrun simctl list devices -j 2>/dev/null | jq -r ".devices[][] | select(.name == \"$SIM_NAME\" and .state == \"Booted\") | .udid" 2>/dev/null | head -1)
     fi
 
-    # PRIORITY 2: Use any booted simulator
+    # PRIORITY 3: Use any booted simulator
     if [ -z "$SIM_UDID" ]; then
         SIM_UDID=$(xcrun simctl list devices -j 2>/dev/null | jq -r '.devices[][] | select(.state == "Booted") | .udid' 2>/dev/null | head -1)
     fi
 
-    # PRIORITY 3: Find available simulator matching name (will need to boot)
+    # PRIORITY 4: Find available simulator matching name (will need to boot)
     if [ -z "$SIM_UDID" ] && [ -n "$SIM_NAME" ]; then
         SIM_UDID=$(xcrun simctl list devices available -j 2>/dev/null | jq -r ".devices[][] | select(.name == \"$SIM_NAME\" and .isAvailable == true) | .udid" 2>/dev/null | head -1)
     fi
 
-    # PRIORITY 4: If still not found, use the first available iPhone
+    # PRIORITY 5: If still not found, use the first available iPhone
     if [ -z "$SIM_UDID" ]; then
         echo "🔍 No simulator specified, finding one..."
         SIM_INFO=$(xcrun simctl list devices available -j 2>/dev/null | jq -r '.devices[][] | select(.isAvailable == true and (.name | contains("iPhone"))) | "\(.udid) \(.name)"' 2>/dev/null | head -1)
