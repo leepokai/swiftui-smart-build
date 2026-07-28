@@ -41,8 +41,18 @@ OUTPUT=""
 # 1. Syntax check (fast, ~0.1s)
 # ============================================================
 SYNTAX_OK=true
-PARSE_OUTPUT=$(swiftc -parse "$FILE_PATH" 2>&1)
-if [ $? -ne 0 ] && [ -n "$PARSE_OUTPUT" ]; then
+# Guard on swiftc the same way the SwiftFormat step below guards on swiftformat.
+# Without it, a missing swiftc exits 127 with "command not found" on stderr, which
+# 2>&1 captures and the check below reports to Claude as a Swift syntax error.
+if ! command -v swiftc &> /dev/null; then
+    echo "swiftc not found (install Xcode command line tools); skipping syntax check" >> "$DEBUG_LOG"
+    PARSE_OUTPUT=""
+    PARSE_EXIT=0
+else
+    PARSE_OUTPUT=$(swiftc -parse "$FILE_PATH" 2>&1)
+    PARSE_EXIT=$?
+fi
+if [ $PARSE_EXIT -ne 0 ] && [ -n "$PARSE_OUTPUT" ]; then
     SYNTAX_OK=false
     HAS_ISSUES=true
     OUTPUT="$OUTPUT
