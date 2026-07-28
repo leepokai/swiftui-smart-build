@@ -49,17 +49,25 @@ fi
 
 echo "PASSED: xcodebuild with BUILD SUCCEEDED detected!" >> "$DEBUG_LOG"
 
+# Extract the value of an xcodebuild flag from the build command.
+# Handles all three shell quoting forms, in this order:
+#   -flag "value with spaces"  |  -flag 'value with spaces'  |  -flag bareword
+# The bare form must stop at the first space, otherwise it swallows every
+# remaining flag on the command line.
+extract_flag() {
+    local flag="$1" cmd="$2"
+    echo "$cmd" | sed -nE \
+        -e "s/.*-${flag}[[:space:]]+\"([^\"]+)\".*/\1/p" \
+        -e "s/.*-${flag}[[:space:]]+'([^']+)'.*/\1/p" \
+        -e "s/.*-${flag}[[:space:]]+([^[:space:]\"']+).*/\1/p" \
+        | head -1
+}
+
 # Try to extract scheme from xcodebuild command
-SCHEME=$(echo "$TOOL_INPUT" | grep -oE '\-scheme\s+"?([^"]+)"?' | sed 's/-scheme[[:space:]]*"*\([^"]*\)"*/\1/' | head -1)
-if [ -z "$SCHEME" ]; then
-    SCHEME=$(echo "$TOOL_INPUT" | grep -oE '\-scheme\s+([^\s]+)' | awk '{print $2}' | head -1)
-fi
+SCHEME=$(extract_flag scheme "$TOOL_INPUT")
 
 # Try to extract destination
-DESTINATION=$(echo "$TOOL_INPUT" | grep -oE '\-destination\s+"[^"]+"' | sed 's/-destination[[:space:]]*"\([^"]*\)"/\1/' | head -1)
-if [ -z "$DESTINATION" ]; then
-    DESTINATION=$(echo "$TOOL_INPUT" | grep -oE "\-destination\s+'[^']+'" | sed "s/-destination[[:space:]]*'\([^']*\)'/\1/" | head -1)
-fi
+DESTINATION=$(extract_flag destination "$TOOL_INPUT")
 
 if [ -z "$SCHEME" ]; then
     # Try to find from "Building..." line in build.sh output
